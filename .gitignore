@@ -1,0 +1,57 @@
+# Dependencies
+/node_modules
+/ecommerce-dashboard/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/ecommerce-dashboard/.next/
+/out/
+/ecommerce-dashboard/out/
+/build
+/ecommerce-dashboard/build
+
+# Production
+/dist
+/ecommerce-dashboard/dist
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local env files
+.env*.local
+!ecommerce-dashboard/.env.local.example
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE specific files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Logs
+logs
+*.log
+
+# Cache
+.npm
+.eslintcache

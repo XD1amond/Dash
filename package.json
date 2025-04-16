@@ -1,0 +1,16 @@
+{
+  "name": "dash-1",
+  "version": "1.0.0",
+  "description": "E-commerce Dashboard Project",
+  "scripts": {
+    "demo": "cd ecommerce-dashboard && npm run demo",
+    "install-deps": "cd ecommerce-dashboard && npm install",
+    "build": "cd ecommerce-dashboard && npm run build",
+    "start": "cd ecommerce-dashboard && npm run start"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1"
+  }
+}
