@@ -136,25 +136,6 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
   {
-    title: "Data Pipeline",
-    href: "/dashboard/data-pipeline",
-    icon: GitBranch,
-    submenu: [
-      {
-        title: "Visualization",
-        href: "/dashboard/data-pipeline",
-      },
-      {
-        title: "Flow Editor",
-        href: "/dashboard/data-pipeline/editor",
-      },
-      {
-        title: "Monitoring",
-        href: "/dashboard/data-pipeline/monitoring",
-      },
-    ],
-  },
-  {
     title: "Settings",
     href: "/dashboard/settings",
     icon: Settings,

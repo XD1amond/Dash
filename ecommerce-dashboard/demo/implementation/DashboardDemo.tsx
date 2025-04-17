@@ -6,7 +6,6 @@ import { CMSDashboard } from "@/components/cms/cms-dashboard"
 import { OrderManagement } from "@/components/orders/order-management"
 import { CustomerManagement } from "@/components/crm/customer-management"
 import { ProductManagement } from "@/components/products/product-management"
-import { DataObjects } from "@/components/data-pipeline/data-objects"
 import { SystemConfig } from "@/components/settings/system-config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -27,13 +26,11 @@ import {
   generateCustomerSegments,
   generateProducts,
   generateProductCategories,
-  generateDataFlow,
   generatePages,
   generateTemplates,
   generateMediaItems,
   generateSystemConfig,
-  generateAllMockData,
-  generateDataObjects
+  generateAllMockData
 } from "../data/mock-data"
 
 export function DashboardDemo() {
@@ -57,7 +54,6 @@ export function DashboardDemo() {
   const [orders, setOrders] = useState(generateOrders(10))
   const [customers, setCustomers] = useState(generateCustomers(10))
   const [products, setProducts] = useState(generateProducts(10))
-  const [dataFlow, setDataFlow] = useState(generateDataFlow())
 
   // Regenerate data when date range changes
   useEffect(() => {
@@ -92,13 +88,12 @@ export function DashboardDemo() {
       
       <main className="flex-1 container mx-auto p-4 md:p-6 space-y-8">
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="w-full grid grid-cols-7 md:w-auto">
+          <TabsList className="w-full grid grid-cols-6 md:w-auto">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="customers">Customers</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="pipeline">Data Pipeline</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
           
@@ -175,14 +170,6 @@ export function DashboardDemo() {
               onEditCategory={(id) => console.log("Edit category:", id)}
               onDeleteCategory={(id) => console.log("Delete category:", id)}
               onBulkAction={(action, ids) => console.log("Bulk action:", action, ids)}
-            />
-          </TabsContent>
-          
-          <TabsContent value="pipeline">
-            <DataObjects
-              dataObjects={generateDataObjects()}
-              dataFlow={generateDataFlow()}
-              onSearch={(query: string) => console.log("Search data objects:", query)}
             />
           </TabsContent>
           

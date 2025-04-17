@@ -198,140 +198,6 @@ function generateTags(category: string) {
   return selectedTags;
 }
 
-// Generate data flow for visualization
-export function generateDataFlow() {
-  const nodes = [
-    {
-      id: 'source-1',
-      name: 'Product Data',
-      type: 'source',
-      status: 'active',
-      inputs: [],
-      outputs: ['transform-1', 'transform-3'],
-      position: { x: 50, y: 50 }
-    },
-    {
-      id: 'source-2',
-      name: 'Customer Data',
-      type: 'source',
-      status: 'active',
-      inputs: [],
-      outputs: ['transform-2', 'transform-3'],
-      position: { x: 50, y: 200 }
-    },
-    {
-      id: 'source-3',
-      name: 'Order Data',
-      type: 'source',
-      status: 'active',
-      inputs: [],
-      outputs: ['transform-2', 'transform-4'],
-      position: { x: 50, y: 350 }
-    },
-    {
-      id: 'transform-1',
-      name: 'Product Enrichment',
-      type: 'transform',
-      status: 'active',
-      inputs: ['source-1'],
-      outputs: ['merge-1'],
-      position: { x: 250, y: 50 }
-    },
-    {
-      id: 'transform-2',
-      name: 'Customer Order Processing',
-      type: 'transform',
-      status: 'warning',
-      inputs: ['source-2', 'source-3'],
-      outputs: ['merge-1'],
-      position: { x: 250, y: 200 }
-    },
-    {
-      id: 'transform-3',
-      name: 'Product Recommendations',
-      type: 'transform',
-      status: 'active',
-      inputs: ['source-1', 'source-2'],
-      outputs: ['sink-2'],
-      position: { x: 250, y: 350 }
-    },
-    {
-      id: 'transform-4',
-      name: 'Order Analytics',
-      type: 'transform',
-      status: 'error',
-      inputs: ['source-3'],
-      outputs: ['filter-1'],
-      position: { x: 250, y: 500 }
-    },
-    {
-      id: 'merge-1',
-      name: 'Data Consolidation',
-      type: 'merge',
-      status: 'active',
-      inputs: ['transform-1', 'transform-2'],
-      outputs: ['filter-1'],
-      position: { x: 450, y: 125 }
-    },
-    {
-      id: 'filter-1',
-      name: 'Data Validation',
-      type: 'filter',
-      status: 'active',
-      inputs: ['merge-1', 'transform-4'],
-      outputs: ['sink-1', 'sink-3'],
-      position: { x: 650, y: 200 }
-    },
-    {
-      id: 'sink-1',
-      name: 'Analytics Dashboard',
-      type: 'sink',
-      status: 'active',
-      inputs: ['filter-1'],
-      outputs: [],
-      position: { x: 850, y: 125 }
-    },
-    {
-      id: 'sink-2',
-      name: 'Marketing Automation',
-      type: 'sink',
-      status: 'active',
-      inputs: ['transform-3'],
-      outputs: [],
-      position: { x: 850, y: 350 }
-    },
-    {
-      id: 'sink-3',
-      name: 'Reporting System',
-      type: 'sink',
-      status: 'pending',
-      inputs: ['filter-1'],
-      outputs: [],
-      position: { x: 850, y: 500 }
-    }
-  ];
-
-  const connections: Array<{
-    id: string;
-    source: string;
-    target: string;
-    label: string;
-  }> = [];
-  
-  // Create connections based on inputs and outputs
-  nodes.forEach(node => {
-    node.outputs.forEach(outputId => {
-      connections.push({
-        id: `${node.id}-to-${outputId}`,
-        source: node.id,
-        target: outputId,
-        label: ''
-      });
-    });
-  });
-
-  return { nodes, connections };
-}
 
 // Generate CMS pages
 export function generatePages() {
@@ -525,53 +391,6 @@ export function generateSystemConfig() {
   };
 }
 
-// Generate data objects for pipeline visualization
-export function generateDataObjects() {
-  return [
-    {
-      id: "sales-data",
-      name: "Sales Data",
-      type: "order",
-      description: "Order and transaction information",
-      usedBy: ["source-3", "transform-2", "transform-4", "sink-1", "sink-3"]
-    },
-    {
-      id: "customer-data",
-      name: "Customer Data",
-      type: "customer",
-      description: "Customer profiles and behavior",
-      usedBy: ["source-2", "transform-2", "transform-3", "sink-1", "sink-2"]
-    },
-    {
-      id: "product-data",
-      name: "Product Data",
-      type: "product",
-      description: "Product catalog and inventory",
-      usedBy: ["source-1", "transform-1", "transform-3", "sink-1"]
-    },
-    {
-      id: "analytics-data",
-      name: "Analytics Data",
-      type: "analytics",
-      description: "Website and business analytics",
-      usedBy: ["transform-4", "filter-1", "sink-1", "sink-3"]
-    },
-    {
-      id: "content-data",
-      name: "Content Data",
-      type: "content",
-      description: "CMS pages and media",
-      usedBy: ["transform-1", "merge-1", "sink-1"]
-    },
-    {
-      id: "category-data",
-      name: "Category Data",
-      type: "category",
-      description: "Product categories and taxonomy",
-      usedBy: ["source-1", "transform-1", "sink-1"]
-    }
-  ];
-}
 
 // Generate all mock data at once
 export function generateAllMockData() {
@@ -581,8 +400,6 @@ export function generateAllMockData() {
     customerSegments: generateCustomerSegments(),
     products: generateProducts(20),
     productCategories: generateProductCategories(),
-    dataFlow: generateDataFlow(),
-    dataObjects: generateDataObjects(),
     pages: generatePages(),
     templates: generateTemplates(),
     mediaItems: generateMediaItems(),

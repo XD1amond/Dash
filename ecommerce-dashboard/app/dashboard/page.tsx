@@ -113,10 +113,6 @@ export default function YourDashboard() {
               </li>
               <li className="flex items-center">
                 <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
-                <span>Data Pipeline Visualization</span>
-              </li>
-              <li className="flex items-center">
-                <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
                 <span>System Configuration</span>
               </li>
             </ul>
