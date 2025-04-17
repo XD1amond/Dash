@@ -5,22 +5,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  Plus, 
-  ChevronDown, 
-  Tag, 
-  Edit, 
-  Copy, 
-  Trash2, 
+import {
+  Search,
+  Filter,
+  Download,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  Tag,
+  Edit,
+  Copy,
+  Trash2,
   MoreHorizontal,
   Image as ImageIcon,
   Package,
   Layers,
   BarChart4,
-  Settings
+  Settings,
+  ArrowUpDown
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -66,6 +68,17 @@ export function ProductManagement({
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [view, setView] = useState<"grid" | "list">("grid")
+  const [productSortField, setProductSortField] = useState<string>("name")
+  const [productSortDirection, setProductSortDirection] = useState<"asc" | "desc">("asc")
+
+  const handleProductSort = (field: string) => {
+    if (field === productSortField) {
+      setProductSortDirection(prev => prev === "asc" ? "desc" : "asc")
+    } else {
+      setProductSortField(field)
+      setProductSortDirection("asc")
+    }
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -90,9 +103,38 @@ export function ProductManagement({
     }
   }
 
-  const filteredProducts = categoryFilter === "all" 
-    ? products 
+  // Filter products by category
+  const filteredProducts = categoryFilter === "all"
+    ? products
     : products.filter(product => product.category === categoryFilter)
+  
+  // Sort products
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    let valueA, valueB;
+    
+    if (productSortField === "name") {
+      valueA = a.name;
+      valueB = b.name;
+    } else if (productSortField === "category") {
+      valueA = a.category;
+      valueB = b.category;
+    } else if (productSortField === "price") {
+      valueA = a.price;
+      valueB = b.price;
+    } else if (productSortField === "inventory") {
+      valueA = a.inventory;
+      valueB = b.inventory;
+    } else {
+      valueA = a[productSortField as keyof typeof a] || "";
+      valueB = b[productSortField as keyof typeof b] || "";
+    }
+    
+    if (productSortDirection === "asc") {
+      return valueA > valueB ? 1 : -1;
+    } else {
+      return valueA < valueB ? 1 : -1;
+    }
+  });
 
   return (
     <div className="space-y-6">
@@ -149,6 +191,53 @@ export function ProductManagement({
                   {category.name}
                 </DropdownMenuItem>
               ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <ArrowUpDown className="mr-2 h-4 w-4" />
+                Sort
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <div className="p-2">
+                <p className="text-sm font-medium mb-1">Sort By</p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleProductSort("name")}>
+                    <span>Name</span>
+                    {productSortField === "name" && (
+                      productSortDirection === "asc" ?
+                        <ChevronUp className="h-4 w-4" /> :
+                        <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleProductSort("category")}>
+                    <span>Category</span>
+                    {productSortField === "category" && (
+                      productSortDirection === "asc" ?
+                        <ChevronUp className="h-4 w-4" /> :
+                        <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleProductSort("price")}>
+                    <span>Price</span>
+                    {productSortField === "price" && (
+                      productSortDirection === "asc" ?
+                        <ChevronUp className="h-4 w-4" /> :
+                        <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleProductSort("inventory")}>
+                    <span>Inventory</span>
+                    {productSortField === "inventory" && (
+                      productSortDirection === "asc" ?
+                        <ChevronUp className="h-4 w-4" /> :
+                        <ChevronDown className="h-4 w-4" />
+                    )}
+                  </div>
+                </div>
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -218,8 +307,8 @@ export function ProductManagement({
         <TabsContent value="products" className="space-y-4">
           {view === "grid" ? (
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
+              {sortedProducts.length > 0 ? (
+                sortedProducts.map((product) => (
                   <Card key={product.id} className="overflow-hidden">
                     <div className="aspect-square relative bg-muted">
                       {product.images && product.images.length > 0 ? (
@@ -333,8 +422,8 @@ export function ProductManagement({
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProducts.length > 0 ? (
-                        filteredProducts.map((product) => (
+                      {sortedProducts.length > 0 ? (
+                        sortedProducts.map((product) => (
                           <tr key={product.id} className="border-b">
                             <td className="p-2">
                               <div className="flex items-center">

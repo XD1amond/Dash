@@ -5,21 +5,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  UserPlus, 
-  Users, 
-  ChevronDown, 
-  Eye, 
-  Edit, 
-  Mail, 
-  Phone, 
-  Tag, 
+import {
+  Search,
+  Filter,
+  Download,
+  UserPlus,
+  Users,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  Edit,
+  Mail,
+  Phone,
+  Tag,
   MoreHorizontal,
   BarChart4,
-  ShoppingBag
+  ShoppingBag,
+  ArrowUpDown
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -64,6 +66,8 @@ export function CustomerManagement({
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedSegment, setSelectedSegment] = useState<string>("all")
   const [view, setView] = useState<"list" | "segments">("list")
+  const [sortField, setSortField] = useState<string>("name")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -72,9 +76,50 @@ export function CustomerManagement({
     }
   }
 
-  const filteredCustomers = selectedSegment === "all" 
-    ? customers 
+  const handleSort = (field: string) => {
+    if (field === sortField) {
+      setSortDirection(prev => prev === "asc" ? "desc" : "asc")
+    } else {
+      setSortField(field)
+      setSortDirection("asc")
+    }
+  }
+
+  // Filter customers by segment
+  const filteredCustomers = selectedSegment === "all"
+    ? customers
     : customers.filter(customer => customer.segment === selectedSegment)
+  
+  // Sort customers
+  const sortedCustomers = [...filteredCustomers].sort((a, b) => {
+    let valueA, valueB;
+    
+    if (sortField === "name") {
+      valueA = a.name;
+      valueB = b.name;
+    } else if (sortField === "email") {
+      valueA = a.email;
+      valueB = b.email;
+    } else if (sortField === "totalOrders") {
+      valueA = a.totalOrders;
+      valueB = b.totalOrders;
+    } else if (sortField === "totalSpent") {
+      valueA = a.totalSpent;
+      valueB = b.totalSpent;
+    } else if (sortField === "segment") {
+      valueA = a.segment || "";
+      valueB = b.segment || "";
+    } else {
+      valueA = a[sortField as keyof typeof a] || "";
+      valueB = b[sortField as keyof typeof b] || "";
+    }
+    
+    if (sortDirection === "asc") {
+      return valueA > valueB ? 1 : -1;
+    } else {
+      return valueA < valueB ? 1 : -1;
+    }
+  });
 
   return (
     <div className="space-y-6">
@@ -139,6 +184,61 @@ export function CustomerManagement({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <ArrowUpDown className="mr-2 h-4 w-4" />
+                  Sort
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                <div className="p-2">
+                  <p className="text-sm font-medium mb-1">Sort By</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("name")}>
+                      <span>Name</span>
+                      {sortField === "name" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("email")}>
+                      <span>Email</span>
+                      {sortField === "email" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("totalOrders")}>
+                      <span>Orders</span>
+                      {sortField === "totalOrders" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("totalSpent")}>
+                      <span>Spent</span>
+                      {sortField === "totalSpent" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("segment")}>
+                      <span>Segment</span>
+                      {sortField === "segment" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <Card>
@@ -163,8 +263,8 @@ export function CustomerManagement({
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredCustomers.length > 0 ? (
-                      filteredCustomers.map((customer) => (
+                    {sortedCustomers.length > 0 ? (
+                      sortedCustomers.map((customer) => (
                         <tr key={customer.id} className="border-b">
                           <td className="p-2 font-medium">{customer.name}</td>
                           <td className="p-2">{customer.email}</td>

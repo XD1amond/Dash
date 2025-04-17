@@ -224,14 +224,15 @@ export function OrderManagement({
               <Search className="h-4 w-4" />
             </Button>
           </form>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" />
-                Filter
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
+          <div className="flex space-x-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
               <div className="p-2">
                 <div className="mb-2">
                   <p className="text-sm font-medium mb-1">Status</p>
@@ -265,8 +266,64 @@ export function OrderManagement({
                   </Select>
                 </div>
               </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <ArrowUpDown className="mr-2 h-4 w-4" />
+                  Sort
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                <div className="p-2">
+                  <p className="text-sm font-medium mb-1">Sort By</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("orderNumber")}>
+                      <span>Order Number</span>
+                      {sortField === "orderNumber" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("customer")}>
+                      <span>Customer</span>
+                      {sortField === "customer" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("status")}>
+                      <span>Status</span>
+                      {sortField === "status" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("createdAt")}>
+                      <span>Date</span>
+                      {sortField === "createdAt" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between cursor-pointer hover:bg-muted p-1 rounded" onClick={() => handleSort("total")}>
+                      <span>Total</span>
+                      {sortField === "total" && (
+                        sortDirection === "asc" ?
+                          <ChevronUp className="h-4 w-4" /> :
+                          <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <Button variant="outline" onClick={onExport}>
             <Download className="mr-2 h-4 w-4" />
             Export
@@ -278,17 +335,7 @@ export function OrderManagement({
         </div>
       </div>
       
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">All Orders</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="processing">Processing</TabsTrigger>
-          <TabsTrigger value="shipped">Shipped</TabsTrigger>
-          <TabsTrigger value="delivered">Delivered</TabsTrigger>
-          <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="all" className="space-y-4">
+      <div className="space-y-4">
           <Card>
             <CardContent className="p-0">
               <div className="rounded-md border">
@@ -446,29 +493,7 @@ export function OrderManagement({
               </Select>
             </div>
           )}
-        </TabsContent>
-        
-        {/* Other tabs will filter by status automatically */}
-        <TabsContent value="pending" className="space-y-4">
-          {/* Same content as "all" but filtered */}
-        </TabsContent>
-        
-        <TabsContent value="processing" className="space-y-4">
-          {/* Same content as "all" but filtered */}
-        </TabsContent>
-        
-        <TabsContent value="shipped" className="space-y-4">
-          {/* Same content as "all" but filtered */}
-        </TabsContent>
-        
-        <TabsContent value="delivered" className="space-y-4">
-          {/* Same content as "all" but filtered */}
-        </TabsContent>
-        
-        <TabsContent value="cancelled" className="space-y-4">
-          {/* Same content as "all" but filtered */}
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   )
 }
