@@ -11,6 +11,12 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@hello-pangea/dnd": "^18.0.1"
+    "@hello-pangea/dnd": "^18.0.1",
+    "@portabletext/react": "^3.2.1",
+    "@sanity/client": "^6.29.0",
+    "@sanity/image-url": "^1.1.0",
+    "@sanity/vision": "^3.85.1",
+    "next-sanity": "^9.10.2",
+    "sanity": "^3.85.1"
   }
 }

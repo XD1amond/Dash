@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Home,
   Menu,
-  X
+  X,
+  Edit3
 } from "lucide-react"
 
 interface SidebarProps {
@@ -75,6 +76,21 @@ const sidebarItems: SidebarItem[] = [
       {
         title: "Media",
         href: "/dashboard/content/media",
+      },
+    ],
+  },
+  {
+    title: "CMS",
+    href: "/cms",
+    icon: Edit3,
+    submenu: [
+      {
+        title: "Dashboard",
+        href: "/cms",
+      },
+      {
+        title: "Sanity Studio",
+        href: "/studio",
       },
     ],
   },
