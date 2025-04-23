@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "E-commerce Dashboard Project",
   "scripts": {
-    "demo": "cd ecommerce-dashboard && npm run demo",
-    "install-deps": "cd ecommerce-dashboard && npm install",
-    "build": "cd ecommerce-dashboard && npm run build",
-    "start": "cd ecommerce-dashboard && npm run start"
+    "demo": "cd Dash && npm run demo",
+    "install-deps": "cd Dash && npm install",
+    "build": "cd Dash && npm run build",
+    "start": "cd Dash && npm run start"
   },
   "author": "",
   "license": "MIT",

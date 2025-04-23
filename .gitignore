@@ -1,6 +1,6 @@
 # Dependencies
 /node_modules
-/ecommerce-dashboard/node_modules
+/Dash/node_modules
 /.pnp
 .pnp.js
 
@@ -9,15 +9,15 @@
 
 # Next.js
 /.next/
-/ecommerce-dashboard/.next/
+/Dash/.next/
 /out/
-/ecommerce-dashboard/out/
+/Dash/out/
 /build
-/ecommerce-dashboard/build
+/Dash/build
 
 # Production
 /dist
-/ecommerce-dashboard/dist
+/Dash/dist
 
 # Misc
 .DS_Store
@@ -31,7 +31,7 @@ yarn-error.log*
 
 # Local env files
 .env*.local
-!ecommerce-dashboard/.env.local.example
+!Dash/.env.local.example
 
 # Vercel
 .vercel
