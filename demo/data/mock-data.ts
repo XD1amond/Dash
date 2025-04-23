@@ -1,12 +1,24 @@
 // Mock data generators for the dashboard demo
+import {
+  OrderItem, // Assuming this type exists
+  Order,
+  Customer,
+  CustomerSegment,
+  Product,
+  ProductCategory,
+  Page,
+  Template,
+  MediaItem,
+  SystemConfig
+} from "../../Dash/app/types/dashboard"; // Assuming these types exist here
 
 // Generate orders
-export function generateOrders(count = 10) {
+export function generateOrders(count = 10): Order[] {
   const statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-  const orders = [];
+  const orders: Order[] = []; // Explicitly type the array
 
   for (let i = 0; i < count; i++) {
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const status = statuses[Math.floor(Math.random() * statuses.length)] as Order['status']; // Assert type
     const total = Math.floor(Math.random() * 500) + 20;
     const date = new Date();
     date.setDate(date.getDate() - Math.floor(Math.random() * 30));
@@ -21,7 +33,13 @@ export function generateOrders(count = 10) {
       },
       status,
       total,
-      items: Math.floor(Math.random() * 5) + 1,
+      // Generate a simple array for items
+      items: Array.from({ length: Math.floor(Math.random() * 5) + 1 }, (_, itemIndex) => ({
+        id: `item-${i + 1}-${itemIndex + 1}`,
+        productId: `prod-${Math.floor(Math.random() * 50) + 1}`, // Placeholder
+        quantity: Math.floor(Math.random() * 3) + 1,
+        price: Math.floor(Math.random() * 100) + 5, // Placeholder
+      })) as OrderItem[],
       createdAt: date.toISOString(),
       updatedAt: date.toISOString()
     });
@@ -31,9 +49,9 @@ export function generateOrders(count = 10) {
 }
 
 // Generate customers
-export function generateCustomers(count = 10) {
+export function generateCustomers(count = 10): Customer[] {
   const segments = ['new', 'returning', 'loyal', 'at-risk', 'inactive', 'vip'];
-  const customers = [];
+  const customers: Customer[] = []; // Explicitly type the array
 
   for (let i = 0; i < count; i++) {
     const segment = segments[Math.floor(Math.random() * segments.length)];
@@ -56,7 +74,7 @@ export function generateCustomers(count = 10) {
 }
 
 // Generate customer segments
-export function generateCustomerSegments() {
+export function generateCustomerSegments(): CustomerSegment[] {
   return [
     {
       id: 'segment-1',
@@ -97,9 +115,9 @@ export function generateCustomerSegments() {
 }
 
 // Generate products
-export function generateProducts(count = 10) {
+export function generateProducts(count = 10): Product[] {
   const categories = ['Electronics', 'Clothing', 'Home & Kitchen', 'Books', 'Toys', 'Beauty', 'Sports'];
-  const products = [];
+  const products: Product[] = []; // Explicitly type the array
 
   for (let i = 0; i < count; i++) {
     const category = categories[Math.floor(Math.random() * categories.length)];
@@ -117,7 +135,8 @@ export function generateProducts(count = 10) {
       images: [
         `https://picsum.photos/seed/product${i + 1}/400/400`
       ],
-      createdAt: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toISOString()
+      createdAt: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toISOString(),
+      updatedAt: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString() // Add updatedAt
     });
   }
 
@@ -125,7 +144,7 @@ export function generateProducts(count = 10) {
 }
 
 // Generate product categories
-export function generateProductCategories() {
+export function generateProductCategories(): ProductCategory[] {
   return [
     {
       id: 'cat-1',
@@ -200,13 +219,14 @@ function generateTags(category: string) {
 
 
 // Generate CMS pages
-export function generatePages() {
+export function generatePages(): Page[] {
   return [
     {
       id: 'page-1',
       title: 'Home Page',
       slug: 'home',
       status: 'published',
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // Add createdAt
       updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -214,6 +234,7 @@ export function generatePages() {
       title: 'About Us',
       slug: 'about',
       status: 'published',
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // Add createdAt
       updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -221,6 +242,7 @@ export function generatePages() {
       title: 'Contact',
       slug: 'contact',
       status: 'published',
+      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // Add createdAt
       updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -228,6 +250,7 @@ export function generatePages() {
       title: 'Products',
       slug: 'products',
       status: 'published',
+      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // Add createdAt
       updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -235,6 +258,7 @@ export function generatePages() {
       title: 'Blog',
       slug: 'blog',
       status: 'published',
+      createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(), // Add createdAt
       updatedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -242,106 +266,125 @@ export function generatePages() {
       title: 'New Feature Announcement',
       slug: 'new-feature',
       status: 'draft',
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // Add createdAt
       updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
     }
   ];
 }
 
 // Generate CMS templates
-export function generateTemplates() {
+export function generateTemplates(): Template[] {
   return [
     {
       id: 'template-1',
       name: 'Default Page',
       description: 'Standard page template with header, content, and footer',
+      createdAt: new Date().toISOString(), // Add createdAt
+      updatedAt: new Date().toISOString(), // Add updatedAt
     },
     {
       id: 'template-2',
       name: 'Landing Page',
       description: 'Template optimized for marketing landing pages',
+      createdAt: new Date().toISOString(), // Add createdAt
+      updatedAt: new Date().toISOString(), // Add updatedAt
     },
     {
       id: 'template-3',
       name: 'Blog Post',
       description: 'Template for blog articles with featured image',
+      createdAt: new Date().toISOString(), // Add createdAt
+      updatedAt: new Date().toISOString(), // Add updatedAt
     },
     {
       id: 'template-4',
       name: 'Product Page',
       description: 'Template for product details with gallery and specifications',
+      createdAt: new Date().toISOString(), // Add createdAt
+      updatedAt: new Date().toISOString(), // Add updatedAt
     },
     {
       id: 'template-5',
       name: 'Contact Form',
       description: 'Template with integrated contact form and map',
+      createdAt: new Date().toISOString(), // Add createdAt
+      updatedAt: new Date().toISOString(), // Add updatedAt
     }
   ];
 }
 
 // Generate media items
-export function generateMediaItems() {
+export function generateMediaItems(): MediaItem[] {
   return [
     {
       id: 'media-1',
       name: 'hero-image.jpg',
       type: 'image',
       url: 'https://picsum.photos/seed/hero/800/400',
-      size: 245000
+      size: 245000,
+      createdAt: new Date().toISOString(), // Add createdAt
     },
     {
       id: 'media-2',
       name: 'product-catalog.pdf',
       type: 'document',
       url: '#',
-      size: 1245000
+      size: 1245000,
+      createdAt: new Date().toISOString(), // Add createdAt
     },
     {
       id: 'media-3',
       name: 'team-photo.jpg',
       type: 'image',
       url: 'https://picsum.photos/seed/team/800/600',
-      size: 345000
+      size: 345000,
+      createdAt: new Date().toISOString(), // Add createdAt
     },
     {
       id: 'media-4',
       name: 'promo-video.mp4',
       type: 'video',
       url: '#',
-      size: 12450000
+      size: 12450000,
+      createdAt: new Date().toISOString(), // Add createdAt
     },
     {
       id: 'media-5',
       name: 'logo.svg',
       type: 'image',
       url: '#',
-      size: 24500
+      size: 24500,
+      createdAt: new Date().toISOString(), // Add createdAt
     },
     {
       id: 'media-6',
       name: 'banner-1.jpg',
       type: 'image',
       url: 'https://picsum.photos/seed/banner1/1200/300',
-      size: 145000
+      size: 145000,
+      createdAt: new Date().toISOString(), // Add createdAt
     },
     {
       id: 'media-7',
       name: 'banner-2.jpg',
       type: 'image',
       url: 'https://picsum.photos/seed/banner2/1200/300',
-      size: 156000
+      size: 156000,
+      createdAt: new Date().toISOString(), // Add createdAt
     },
     {
       id: 'media-8',
       name: 'product-1.jpg',
       type: 'image',
       url: 'https://picsum.photos/seed/product1/500/500',
-      size: 98000
+      size: 98000,
+      createdAt: new Date().toISOString(), // Add createdAt
     }
   ];
 }
 
 // Generate system configuration
-export function generateSystemConfig() {
+export function generateSystemConfig() { // Remove SystemConfig type annotation
   return {
     appearance: {
       theme: "dark" as "light" | "dark" | "system",

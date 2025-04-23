@@ -18,7 +18,13 @@ export const revalidate = 60 // Revalidate this page every 60 seconds
 export async function generateStaticParams() {
   const query = `*[_type == "page" && defined(slug.current)][].slug.current`
   const slugs = await client.fetch<string[]>(query)
-  
+
+  // Handle case where Sanity is not configured and fetch returns null
+  if (!slugs) {
+    console.warn('Sanity not configured: Skipping static param generation for pages.');
+    return []; // Return empty array if no slugs found or Sanity inactive
+  }
+
   return slugs.map((slug: string) => ({
     slug,
   }))

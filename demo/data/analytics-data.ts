@@ -1,11 +1,11 @@
-import { 
-  RevenueData, 
-  SalesData, 
-  VisitorsData, 
+import {
+  RevenueData,
+  SalesData,
+  VisitorsData,
   ConversionData,
   StatCardData
-} from "@/types/dashboard"
-import { formatCurrency } from "@/lib/utils"
+} from "../../Dash/app/types/dashboard"
+import { formatCurrency } from "../../Dash/app/lib/utils"
 
 /**
  * Generate mock revenue data

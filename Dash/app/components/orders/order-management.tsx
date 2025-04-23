@@ -22,21 +22,9 @@ import {
   ChevronDown,
   ChevronUp
 } from "lucide-react"
+import { Order, OrderItem } from "@/types/dashboard"; // Import shared types
 
-interface Order {
-  id: string
-  orderNumber: string
-  customer: {
-    id: string
-    name: string
-    email: string
-  }
-  status: string
-  total: number
-  items: number
-  createdAt: string
-  updatedAt: string
-}
+// Remove local Order interface definition
 
 interface OrderManagementProps {
   orders: Order[]
@@ -165,17 +153,47 @@ export function OrderManagement({
       valueA = a.total
       valueB = b.total
     } else if (sortField === "items") {
-      valueA = a.items
-      valueB = b.items
+      valueA = a.items.length // Sort by number of items
+      valueB = b.items.length // Sort by number of items
     } else {
-      valueA = new Date(a[sortField as keyof Order] as string).getTime()
-      valueB = new Date(b[sortField as keyof Order] as string).getTime()
+      // Handle date fields specifically
+      const dateFields: (keyof Order)[] = ["createdAt", "updatedAt"];
+      if (dateFields.includes(sortField as keyof Order)) {
+        valueA = new Date(a[sortField as keyof Order] as string).getTime();
+        valueB = new Date(b[sortField as keyof Order] as string).getTime();
+        // Handle potential NaN values specifically for dates
+        valueA = isNaN(valueA) ? 0 : valueA;
+        valueB = isNaN(valueB) ? 0 : valueB;
+      } else {
+        // Handle other valid fields (assuming they exist and are comparable)
+        // Note: 'items' is handled above by length
+        const otherValidFields: (keyof Order)[] = ["orderNumber", "customer", "status", "total"];
+         if (otherValidFields.includes(sortField as keyof Order)) {
+            // Special case for customer name (nested property)
+            if (sortField === 'customer') {
+                valueA = a.customer.name;
+                valueB = b.customer.name;
+            } else {
+                // Direct properties like orderNumber, status, total
+                valueA = a[sortField as keyof Order];
+                valueB = b[sortField as keyof Order];
+            }
+         } else {
+           // Default for invalid fields
+           valueA = 0;
+           valueB = 0;
+         }
+      }
     }
-    
+
+    // Final comparison works for numbers and strings
+    if (valueA === valueB) {
+      return 0;
+    }
     if (sortDirection === "asc") {
-      return valueA > valueB ? 1 : -1
+      return valueA > valueB ? 1 : -1;
     } else {
-      return valueA < valueB ? 1 : -1
+      return valueA < valueB ? 1 : -1;
     }
   })
   

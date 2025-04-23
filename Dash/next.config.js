@@ -8,6 +8,23 @@ const nextConfig = {
   experimental: {
     serverActions: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/demo',
+        destination: '/?show=demo', // Rewrite /demo to root page with query param
+      },
+    ]
+  },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/demo',
+        permanent: true, // Use true for permanent redirect (SEO friendly)
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

@@ -1,16 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { DashboardOverview } from "@/components/dashboard/dashboard-overview"
-import { CMSDashboard } from "@/components/cms/cms-dashboard"
-import { OrderManagement } from "@/components/orders/order-management"
-import { CustomerManagement } from "@/components/crm/customer-management"
-import { ProductManagement } from "@/components/products/product-management"
-import { SystemConfig } from "@/components/settings/system-config"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
+import React, { useState, useEffect } from "react"
+import { DashboardOverview } from "../../Dash/app/components/dashboard/dashboard-overview"
+import { CMSDashboard } from "../../Dash/app/components/cms/cms-dashboard"
+import { OrderManagement } from "../../Dash/app/components/orders/order-management"
+import { CustomerManagement } from "../../Dash/app/components/crm/customer-management"
+import { ProductManagement } from "../../Dash/app/components/products/product-management"
+import { SystemConfig } from "../../Dash/app/components/settings/system-config"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../Dash/app/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../Dash/app/components/ui/tabs"
+import { Button } from "../../Dash/app/components/ui/button"
+// import { Download } from "lucide-react" // Removed unused import
 
 import {
   generateRevenueData,
@@ -88,7 +88,7 @@ export function DashboardDemo() {
       
       <main className="flex-1 container mx-auto p-4 md:p-6 space-y-8">
         <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="w-full grid grid-cols-6 md:w-auto">
+          <TabsList className="w-full"> {/* Removed md:w-auto to make it always full width */}
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="cms">CMS</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
