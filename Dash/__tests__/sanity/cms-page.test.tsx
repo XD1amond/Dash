@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Mock the client module
-jest.mock('@/sanity/lib/client', () => ({
+jest.mock('@/config/cms.config', () => ({ // Updated mock path
   client: {
     fetch: jest.fn().mockImplementation((query = '') => Promise.resolve({
       pages: [{ _id: 'test-page', title: 'Test Page' }],
@@ -14,7 +14,7 @@ jest.mock('@/sanity/lib/client', () => ({
 }));
 
 // Import after mocking
-import { client } from '@/sanity/lib/client';
+import { client } from '@/config/cms.config'; // Updated import path
 
 // Create a mock component
 const MockSanityDashboard = ({ initialData }: { initialData?: any }) => (

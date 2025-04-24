@@ -1,5 +1,6 @@
-import { createClient as createSanityClient, SanityClient } from 'next-sanity' // Import SanityClient type
-import { apiVersion, dataset, projectId, useCdn, token as sanityBaseToken } from '../env' // Import base token
+import { createClient as createSanityClient, SanityClient } from 'next-sanity';
+// Adjust the import path for env relative to the new config directory
+import { apiVersion, dataset, projectId, useCdn, token as sanityBaseToken } from '../sanity/env';
 
 // Define a dummy client that warns and returns null
 const dummyClient = {
@@ -18,9 +19,9 @@ const dummyClient = {
 let resolvedClient: SanityClient;
 let resolvedCreateClient: (preview?: { token?: string }) => SanityClient;
 
-// Check if projectId is the placeholder
-if (projectId === 'your-project-id') {
-  console.warn('Sanity project ID is placeholder. Using dummy Sanity client.');
+// Check if projectId is the placeholder or missing
+if (!projectId || projectId === 'your-project-id') {
+  console.warn('Sanity project ID is missing or placeholder. Using dummy Sanity client.');
   resolvedClient = dummyClient;
   resolvedCreateClient = (_preview?: { token?: string }) => dummyClient;
 } else {
@@ -79,11 +80,8 @@ export async function sanityFetch<QueryResponse>({
   // Check for token only if draft mode is requested
   if (isDraftMode && !token && !sanityBaseToken) {
     // Allow draft mode if base token exists, otherwise require specific token
-    console.warn('Sanity draft mode requested but no token provided (either via fetch options or SANITY_API_TOKEN env var).');
-    // Depending on requirements, you might throw, or fallback to published
-    // Let's fallback to published perspective by not passing preview options
-    // return sanityFetch({ query, params, tags, preview: false }); // Recursive call - careful!
-    // Safer: create a non-preview client directly
+    console.warn('Sanity draft mode requested but no token provided (either via fetch options or SANITY_API_TOKEN env var). Falling back to published content.');
+    // Fallback to published perspective by not passing preview options
      const sanityClient = createClient(); // Uses resolvedCreateClient without preview options
      return sanityClient.fetch<QueryResponse>(query, params, {
        next: { tags },

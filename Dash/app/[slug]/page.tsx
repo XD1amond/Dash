@@ -1,6 +1,6 @@
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { client } from '../../sanity/lib/client'
+import { client } from '../../config/cms.config' // Updated import path
 import { PortableText } from '../components/cms/portable-text'
 
 interface PageProps {

@@ -1,6 +1,6 @@
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createClient } from '../../../sanity/lib/client'
+import { createClient } from '../../../config/cms.config' // Updated import path
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)

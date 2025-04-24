@@ -32,6 +32,7 @@ yarn-error.log*
 # Local env files
 .env*.local
 !Dash/.env.local.example
+/Dash/.env
 
 # Vercel
 .vercel

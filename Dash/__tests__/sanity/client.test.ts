@@ -1,7 +1,7 @@
-import { client, createClient } from '@/sanity/lib/client';
+import { client, createClient } from '@/config/cms.config'; // Updated import path
 
 // Mock the Sanity client
-jest.mock('@/sanity/lib/client', () => {
+jest.mock('@/config/cms.config', () => { // Updated mock path
   const mockFetch = jest.fn().mockResolvedValue([]);
   
   return {

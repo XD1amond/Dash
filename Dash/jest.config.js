@@ -13,7 +13,8 @@ const customJestConfig = {
     // Handle module aliases
     '^@/components/(.*)$': '<rootDir>/app/components/$1',
     '^@/lib/(.*)$': '<rootDir>/app/lib/$1',
-    '^@/sanity/(.*)$': '<rootDir>/sanity/$1',
+    '^@/sanity/(.*)$': '<rootDir>/sanity/$1', // Keep existing sanity mapping for other files if needed
+    '^@/config/(.*)$': '<rootDir>/config/$1', // Add mapping for new config directory
   },
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',

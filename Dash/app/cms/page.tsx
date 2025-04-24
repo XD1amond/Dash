@@ -1,5 +1,5 @@
 import { SanityDashboard } from "../components/cms/sanity-dashboard"
-import { client } from "../../sanity/lib/client"
+import { client } from "../../config/cms.config" // Updated import path
 
 export const revalidate = 60 // Revalidate this page every 60 seconds
 

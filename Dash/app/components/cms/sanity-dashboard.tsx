@@ -13,7 +13,7 @@ import { Label } from "../ui/label"
 import { Badge } from "../ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import { Skeleton } from "../ui/skeleton"
-import { client } from "../../../sanity/lib/client"
+import { client } from "../../../config/cms.config" // Updated import path
 import {
   Search,
   Filter,

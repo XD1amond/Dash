@@ -14,7 +14,7 @@ const MockSanityDashboard = ({ initialData }: { initialData?: any }) => (
 );
 
 // Mock the client module
-jest.mock('@/sanity/lib/client', () => {
+jest.mock('@/config/cms.config', () => { // Updated mock path
   const mockFetch = jest.fn().mockImplementation(() => Promise.resolve({
     pages: [{ _id: 'page-1', title: 'Test Page' }],
     templates: [],
@@ -34,7 +34,7 @@ jest.mock('@/components/cms/sanity-dashboard', () => ({
 }));
 
 // Import after mocking
-import { client } from '@/sanity/lib/client';
+import { client } from '@/config/cms.config'; // Updated import path
 
 describe('SanityDashboard', () => {
   beforeEach(() => {
