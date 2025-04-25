@@ -1,0 +1,45 @@
+# Source files
+app/
+config/
+sanity/
+public/
+
+# Next.js specific
+.next/
+out/
+
+# Build files
+node_modules/
+.turbo/
+.vercel/
+
+# Test files
+__tests__/
+jest.config.js
+jest.setup.js
+
+# Config files
+.eslintrc.json
+.prettierrc
+postcss.config.js
+tailwind.config.js
+tsconfig.json
+tsconfig.build.json
+tsup.config.ts
+next.config.js
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Editor files
+.vscode/
+.idea/
+
+# Misc
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

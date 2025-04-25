@@ -74,15 +74,69 @@ The core dashboard library is organized as follows:
 - **State Management**: React Query for server state, Zustand for client state (within components)
 - **Testing**: Jest, React Testing Library (Tests included within `Dash/` for component verification)
 
+## Installation via npm from GitHub
+
+You can now install the Dash dashboard directly from GitHub using npm:
+
+```bash
+# Using npm
+npm install github:XD1amond/Dash#main:Dash
+
+# Using yarn
+yarn add github:XD1amond/Dash#main:Dash
+
+# Using pnpm
+pnpm add github:XD1amond/Dash#main:Dash
+```
+
+If you want to install a specific version or branch:
+
+```bash
+# Install a specific version
+npm install github:XD1amond/Dash#v1.0.0:Dash
+
+# Install from a specific branch
+npm install github:XD1amond/Dash#feature-branch:Dash
+```
+
+The `:Dash` suffix is important - it tells npm to only install from the Dash subdirectory of the repository, not the entire repository (which would include the demo folder).
+
+After installation, you can import components directly:
+
+```jsx
+import { DashboardOverview, OrderManagement, Button } from '@xd1amond/dash';
+
+function MyAdminPage() {
+  return (
+    <div>
+      <h1>Admin Dashboard</h1>
+      <DashboardOverview />
+      <OrderManagement />
+    </div>
+  );
+}
+```
+
+To update to the latest version:
+
+```bash
+npm update github:XD1amond/Dash#main:Dash
+```
+
 ## Integration Guide
 
 Follow these steps to integrate the `Dash` components into your existing Next.js e-commerce application:
 
 ### 1. Add Dashboard Files to Your Project
 
-Copy the entire `Dash/` directory into your project structure. A common location might be `/lib/dashboard` or `/integrations/dashboard`, but you can place it where it makes sense for your project. Adjust path aliases if necessary.
+You can either:
 
-Alternatively, you could publish `Dash/` as a private npm package and install it.
+1. Install directly from GitHub (recommended):
+   ```bash
+   npm install github:XD1amond/Dash#main:Dash
+   ```
+
+2. Copy the entire `Dash/` directory into your project structure. A common location might be `/lib/dashboard` or `/integrations/dashboard`, but you can place it where it makes sense for your project. Adjust path aliases if necessary.
 
 ### 2. Install Dependencies
 
@@ -118,9 +172,70 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000 # Your app's local URL
 
 Ensure the Sanity client configuration in `Dash/config/cms.config.ts` correctly reads these variables.
 
-### 4. Implement Data Fetching (`data.config.ts`)
+### 4. Implement Data Fetching
 
-This is the most crucial integration step. Open `Dash/config/data.config.ts` (within the copied directory in your host app). This file contains placeholder functions (like `fetchRevenueData`, `fetchOrders`) and interfaces.
+#### If installed via npm:
+
+Create a data provider file in your project that implements the required data fetching functions:
+
+```typescript
+// src/lib/dash-data-provider.ts
+
+import {
+  RevenueDataPoint,
+  Order
+} from '@xd1amond/dash';
+import { getMyRevenue, getMyOrders } from '@/api/my-ecommerce-api'; // Your actual API functions
+
+export const fetchRevenueData = async (/* params */): Promise<RevenueDataPoint[]> => {
+  // Your actual data fetching logic
+  const revenue = await getMyRevenue(/* params */);
+  // Transform the data if necessary to match the RevenueDataPoint interface
+  return revenue.map(item => ({ date: item.month, revenue: item.amount }));
+};
+
+export const fetchOrders = async (/* params */): Promise<Order[]> => {
+  // Your actual data fetching logic
+  const orders = await getMyOrders(/* params */);
+  // Transform data if necessary
+  return orders.map(order => ({
+    id: order.order_id,
+    customerName: order.customer_details.name,
+    date: order.created_at,
+    status: order.status, // Ensure status matches the defined types
+    total: order.total_amount,
+  }));
+};
+
+export const fetchOrderById = async (orderId: string): Promise<Order | null> => {
+  // Your actual data fetching logic
+  const order = await getMyOrderById(orderId);
+  if (!order) return null;
+  
+  return {
+    id: order.order_id,
+    customerName: order.customer_details.name,
+    date: order.created_at,
+    status: order.status,
+    total: order.total_amount,
+  };
+};
+```
+
+Then pass these functions to the components:
+
+```tsx
+import { OrderManagement } from '@xd1amond/dash';
+import { fetchOrders } from '@/lib/dash-data-provider';
+
+export default function OrdersPage() {
+  return <OrderManagement fetchOrdersFunction={fetchOrders} />;
+}
+```
+
+#### If copied into your project:
+
+Open `Dash/config/data.config.ts` (within the copied directory in your host app). This file contains placeholder functions (like `fetchRevenueData`, `fetchOrders`) and interfaces.
 
 **You MUST replace these placeholders with your actual logic** to fetch data from your e-commerce platform's backend API, database, or analytics service. The dashboard components rely on these functions to get the data they need to display.
 
@@ -158,6 +273,30 @@ export const fetchOrders = async (/* params */): Promise<Order[]> => {
 
 ### 5. Configure Tailwind CSS
 
+#### If installed via npm:
+
+Ensure your host application's `tailwind.config.js` is set up to scan the node_modules directory for the Dash components:
+
+```javascript
+// tailwind.config.js (in your host app)
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './app/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@xd1amond/dash/**/*.{js,ts,jsx,tsx}',
+  ],
+  theme: {
+    // Your theme extensions
+  },
+  plugins: [
+    require('tailwindcss-animate'), // Ensure this plugin is installed and added
+  ],
+}
+```
+
+#### If copied into your project:
+
 Ensure your host application's `tailwind.config.js` is set up to scan the copied `Dash/` directory for classes:
 
 ```javascript
@@ -186,7 +325,25 @@ If your host application uses different path aliases (e.g., `~/*` instead of `@/
 
 ### 7. Use the Components
 
-Import and use the dashboard components within your application pages. Use the barrel files for cleaner imports.
+Import and use the dashboard components within your application pages.
+
+#### If installed via npm:
+
+```tsx
+// Example: In your app/admin/orders/page.tsx
+import { OrderManagement } from '@xd1amond/dash';
+
+export default function AdminOrdersPage() {
+  return (
+    <div>
+      <h1>Manage Orders</h1>
+      <OrderManagement />
+    </div>
+  );
+}
+```
+
+#### If copied into your project:
 
 ```tsx
 // Example: In your app/admin/orders/page.tsx

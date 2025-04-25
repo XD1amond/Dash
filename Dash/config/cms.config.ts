@@ -83,9 +83,7 @@ export async function sanityFetch<QueryResponse>({
     console.warn('Sanity draft mode requested but no token provided (either via fetch options or SANITY_API_TOKEN env var). Falling back to published content.');
     // Fallback to published perspective by not passing preview options
      const sanityClient = createClient(); // Uses resolvedCreateClient without preview options
-     return sanityClient.fetch<QueryResponse>(query, params, {
-       next: { tags },
-     });
+     return sanityClient.fetch<QueryResponse>(query, params);
   }
 
   // Use the resolved createClient, passing preview token if available
@@ -95,9 +93,5 @@ export async function sanityFetch<QueryResponse>({
 
   // Fetch will use the correct perspective ('previewDrafts' or 'published')
   // based on how createClient was resolved and the preview options passed
-  return sanityClient.fetch<QueryResponse>(query, params, {
-    next: {
-      tags, // For Next.js cache revalidation
-    },
-  })
+  return sanityClient.fetch<QueryResponse>(query, params)
 }
