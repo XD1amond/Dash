@@ -24,60 +24,37 @@ export interface WidgetDefinition {
   category: string
 }
 
-interface LayoutSection {
+// Export LayoutSection type
+export interface LayoutSection {
   id: string
   title: string
   widgets: string[] // IDs of widgets
 }
 
+// --- Final Props for Controlled Component ---
 interface CustomizableLayoutProps {
-  availableWidgets: WidgetDefinition[]
-  defaultLayout: LayoutSection[]
-  onLayoutChange?: (layout: LayoutSection[]) => void
-  isEditingExternal?: boolean
-  onEditingChange?: (isEditing: boolean) => void
+  instanceId: string // Unique ID for this instance (e.g., 'header', 'overview', 'business')
+  isEditing: boolean // Controlled by parent
+  availableWidgets: WidgetDefinition[] // All widgets potentially available for this area
+  layout: LayoutSection[] // Current layout state, controlled by parent
+  onLayoutChange: (instanceId: string, newLayout: LayoutSection[]) => void // Reports layout changes to parent
+  onAreaSelect: (instanceId: string, sectionId: string, availableWidgetsForArea: WidgetDefinition[]) => void // Reports click when editing
 }
 
 export function CustomizableLayout({
+  instanceId,
+  isEditing,
   availableWidgets,
-  defaultLayout,
+  layout, // Use layout from props
   onLayoutChange,
-  isEditingExternal,
-  onEditingChange
+  onAreaSelect
 }: CustomizableLayoutProps) {
-  const [layout, setLayout] = useState<LayoutSection[]>(defaultLayout)
-  const [isEditing, setIsEditing] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<string>("all")
-  const [searchTerm, setSearchTerm] = useState<string>("")
-  const [selectedSizes, setSelectedSizes] = useState<string[]>(["small", "medium", "large", "full"])
-  
-  // Group widgets by category
-  const widgetCategories = availableWidgets
-    .map(widget => widget.category)
-    .filter((category, index, self) => self.indexOf(category) === index);
-    
-  // Filter widgets based on search term, category, and size
-  const filteredWidgets = availableWidgets.filter(widget => {
-    const matchesSearch = searchTerm === "" ||
-      widget.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      widget.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || widget.category === selectedCategory;
-    const matchesSize = selectedSizes.includes(widget.defaultSize);
-    return matchesSearch && matchesCategory && matchesSize;
-  });
-  
-  // Sync with external editing state if provided
-  useEffect(() => {
-    if (isEditingExternal !== undefined) {
-      setIsEditing(isEditingExternal);
-      setSidebarOpen(isEditingExternal);
-    }
-  }, [isEditingExternal]);
-  
-  // Find widget by ID
+  // Removed ALL internal state related to layout, editing, sidebar
+
+  // Find widget definition by ID from the available widgets for this instance
   const getWidgetById = (id: string) => {
     return availableWidgets.find(widget => widget.id === id)
+    // Removed grouping/filtering logic - sidebar is gone
   }
 
   // Handle drag end
@@ -110,10 +87,8 @@ export function CustomizableLayout({
             return section
           })
           
-          setLayout(newLayout)
-          if (onLayoutChange) {
-            onLayoutChange(newLayout)
-          }
+          // Report change to parent instead of setting local state
+          onLayoutChange(instanceId, newLayout)
         }
       }
       return
@@ -134,10 +109,8 @@ export function CustomizableLayout({
           return section
         })
         
-        setLayout(newLayout)
-        if (onLayoutChange) {
-          onLayoutChange(newLayout)
-        }
+        // Report change to parent
+        onLayoutChange(instanceId, newLayout)
       }
       return
     }
@@ -163,10 +136,8 @@ export function CustomizableLayout({
           return section
         })
         
-        setLayout(newLayout)
-        if (onLayoutChange) {
-          onLayoutChange(newLayout)
-        }
+        // Report change to parent
+        onLayoutChange(instanceId, newLayout)
       }
     } else {
       // Handle reordering within the same section
@@ -184,320 +155,147 @@ export function CustomizableLayout({
           return s
         })
         
-        setLayout(newLayout)
-        if (onLayoutChange) {
-          onLayoutChange(newLayout)
-        }
+        // Report change to parent
+        onLayoutChange(instanceId, newLayout)
       }
     }
   }
 
-  // Add widget to section
-  const addWidgetToSection = (widgetId: string, sectionId: string) => {
-    const newLayout = layout.map(section => {
-      if (section.id === sectionId) {
-        return {
-          ...section,
-          widgets: [...section.widgets, widgetId]
-        }
-      }
-      return section
-    })
-    
-    setLayout(newLayout)
-    if (onLayoutChange) {
-      onLayoutChange(newLayout)
-    }
-  }
-
-  // Remove widget from section
+  // Remove widget from section - Reports change via prop
   const removeWidgetFromSection = (widgetId: string, sectionId: string, index: number) => {
     const newLayout = layout.map(section => {
       if (section.id === sectionId) {
         const widgets = [...section.widgets]
         widgets.splice(index, 1)
-        return {
-          ...section,
-          widgets
-        }
+        return { ...section, widgets }
       }
       return section
     })
-    
-    setLayout(newLayout)
-    if (onLayoutChange) {
-      onLayoutChange(newLayout)
-    }
+    // Report change to parent
+    onLayoutChange(instanceId, newLayout)
   }
 
-  // Reset to default layout
-  const resetLayout = () => {
-    setLayout(defaultLayout)
-    if (onLayoutChange) {
-      onLayoutChange(defaultLayout)
-    }
-  }
+  // Removed internal state management functions:
+  // resetLayout, toggleCustomizeMode, openSidebarForSection, closeSidebar
 
-  // Toggle editing mode
-  const toggleEditing = () => {
-    const newEditingState = !isEditing;
-    setIsEditing(newEditingState);
-    setSidebarOpen(newEditingState);
-    
-    // Notify parent component if callback provided
-    if (onEditingChange) {
-      onEditingChange(newEditingState);
+  // Handle click on the layout area to trigger selection in parent
+  const handleAreaClick = () => {
+    if (isEditing && layout.length > 0) {
+      // Call parent handler with the instance ID, the ID of the first section in this layout,
+      // and the list of widgets available for this specific layout instance.
+      onAreaSelect(instanceId, layout[0].id, availableWidgets);
     }
   };
 
   return (
-    <div className="space-y-4">
-      {/* Only show customize button if not controlled externally */}
-      {isEditingExternal === undefined && (
-        <div className="flex justify-end mb-4">
-          <Button
-            variant={isEditing ? "default" : "outline"}
-            size="sm"
-            onClick={toggleEditing}
-          >
-            {isEditing ? (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                Save Layout
-              </>
-            ) : (
-              <>
-                <Pencil className="mr-2 h-4 w-4" />
-                Customize
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+    <DragDropContext onDragEnd={handleDragEnd}>
+      {/* Wrapper div for click handling and outline */}
+      <div
+        className={cn(
+          "customizable-layout-area p-1", // Add slight padding for outline visibility
+          isEditing ? "cursor-pointer hover:bg-muted/20 rounded-md" : "" // Change cursor and add hover effect when editing
+          // Outline style will be applied by parent based on active tab/header focus
+        )}
+        onClick={handleAreaClick}
+        role="button" // Semantics for clickability
+        tabIndex={isEditing ? 0 : -1} // Make focusable when editing
+        aria-label={isEditing ? `Select ${instanceId} area for customization` : ""}
+      >
+        {/* Removed local Customize button */}
+        {/* Removed outer relative flex container */}
+        {/* Removed sidebar rendering */}
 
-      <div className="flex relative">
-        <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'pr-4' : ''}`}>
-          {isEditing && (
-            <div className="mb-4">
-              <h2 className="text-lg font-medium mb-2">Customize Dashboard Layout</h2>
-              <p className="text-sm text-muted-foreground">
-                Drag widgets to rearrange them or drag from the sidebar to add new widgets
-              </p>
-              <div className="flex gap-2 mt-2">
-                <Button variant="outline" size="sm" onClick={resetLayout}>
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Reset Layout
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Dashboard Layout */}
-          {layout.map(section => (
-            <div key={section.id} className="space-y-4">
+        {/* Dashboard Layout Sections */}
+        {layout.map(section => (
+          <div key={section.id} className="mb-8">
+            <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">{section.title}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {section.widgets.map((widgetId, index) => {
-                  const widget = getWidgetById(widgetId)
-                  if (!widget) return null
-                  
-                  const sizeClasses = {
-                    small: "md:col-span-1",
-                    medium: "md:col-span-1 lg:col-span-2",
-                    large: "md:col-span-2 lg:col-span-2",
-                    full: "md:col-span-2 lg:col-span-4"
-                  }
-                  
-                  return (
-                    <div
-                      key={`${section.id}-${widgetId}-${index}`}
-                      className={cn(
-                        "relative",
-                        sizeClasses[widget.defaultSize]
-                      )}
-                    >
-                      {isEditing && (
-                        <>
+              {/* Removed Add Widget button */}
+            </div>
+            <Droppable droppableId={section.id} type="WIDGET">
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={cn(
+                    "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[100px] rounded-md border border-transparent p-2", // Add padding and transparent border
+                    snapshot.isDraggingOver ? "bg-primary/10 border-dashed border-primary ring-2 ring-primary/50" : "", // Enhanced drop zone highlight
+                    isEditing && !snapshot.isDraggingOver ? "border-dashed border-muted-foreground/20" : "" // Subtle border when editing overall (and not dragging over)
+                  )}
+                >
+                  {section.widgets.map((widgetId, index) => {
+                    const widget = getWidgetById(widgetId)
+                    if (!widget) return null
+
+                    const sizeClasses = {
+                      small: "md:col-span-1",
+                      medium: "md:col-span-1 lg:col-span-2",
+                      large: "md:col-span-2 lg:col-span-2",
+                      full: "md:col-span-2 lg:col-span-4"
+                    }
+
+                    return (
+                      <Draggable key={widgetId} draggableId={widgetId} index={index} isDragDisabled={!isEditing}>
+                        {(providedDraggable, snapshotDraggable) => (
                           <div
-                            className="absolute top-0 left-0 right-0 h-8 bg-muted/20 cursor-move z-10 flex items-center justify-between px-2"
+                            ref={providedDraggable.innerRef}
+                            {...providedDraggable.draggableProps}
+                            className={cn(
+                              "relative group transition-shadow duration-200", // Add group for hover effects, transition
+                              sizeClasses[widget.defaultSize],
+                              snapshotDraggable.isDragging ? "opacity-80 shadow-xl rounded-md z-50" : "z-10", // Ensure dragging item is on top, add shadow/rounding
+                              isEditing ? "hover:shadow-md rounded-md" : "" // Add hover shadow when editing
+                            )}
+                            style={{
+                              // Required for smooth animation when items move
+                              ...providedDraggable.draggableProps.style,
+                            }}
                           >
-                            <span className="text-xs text-muted-foreground">Drag to move</span>
-                            <Move className="h-3 w-3 text-muted-foreground" />
+                            {isEditing && (
+                              <>
+                                {/* Drag Handle - More visible */}
+                                <div
+                                  {...providedDraggable.dragHandleProps}
+                                  className="absolute -top-2 -left-2 p-1 bg-primary text-primary-foreground rounded-full shadow cursor-move z-30 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
+                                  aria-label="Drag widget"
+                                  tabIndex={0} // Make handle focusable
+                                >
+                                  <Move className="h-4 w-4" />
+                                </div>
+                                {/* Remove Button - More visible */}
+                                <div className="absolute -top-2 -right-2 z-40">
+                                  <Button
+                                    variant="destructive" // Use destructive variant
+                                    size="icon"
+                                    className="h-6 w-6 rounded-full shadow opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" // Show button on hover/focus
+                                    onClick={(e) => {
+                                       e.stopPropagation(); // Prevent area click when removing
+                                       removeWidgetFromSection(widgetId, section.id, index)
+                                    }}
+                                    aria-label="Remove widget"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                                {/* Content - No extra padding needed now */}
+                                <div>
+                                  {widget.component}
+                                </div>
+                              </>
+                            )}
+                            {!isEditing && widget.component} {/* Render normally */}
                           </div>
-                          <div className="absolute top-2 right-2 z-20">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 rounded-full bg-background/80 backdrop-blur-sm"
-                              onClick={() => removeWidgetFromSection(widgetId, section.id, index)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                      {widget.component}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Slide-in sidebar with available widgets */}
-        <div
-          className={`fixed top-0 right-0 h-full bg-background border-l shadow-lg z-50 transition-all duration-300 transform ${
-            sidebarOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-          style={{ width: '350px' }}
-        >
-          <div className="h-full flex flex-col p-4 overflow-hidden">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium text-lg">Widget Library</h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSidebarOpen(false)}
-                className="h-8 w-8"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <p className="text-sm text-muted-foreground mb-2">
-              Drag widgets to add them to your dashboard or click the Add button
-            </p>
-            
-            {/* Search and filter */}
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search widgets..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuCheckboxItem
-                    checked={selectedSizes.includes("small")}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedSizes([...selectedSizes, "small"]);
-                      } else {
-                        setSelectedSizes(selectedSizes.filter(size => size !== "small"));
-                      }
-                    }}
-                  >
-                    Small Widgets
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={selectedSizes.includes("medium")}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedSizes([...selectedSizes, "medium"]);
-                      } else {
-                        setSelectedSizes(selectedSizes.filter(size => size !== "medium"));
-                      }
-                    }}
-                  >
-                    Medium Widgets
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={selectedSizes.includes("large")}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedSizes([...selectedSizes, "large"]);
-                      } else {
-                        setSelectedSizes(selectedSizes.filter(size => size !== "large"));
-                      }
-                    }}
-                  >
-                    Large Widgets
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={selectedSizes.includes("full")}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedSizes([...selectedSizes, "full"]);
-                      } else {
-                        setSelectedSizes(selectedSizes.filter(size => size !== "full"));
-                      }
-                    }}
-                  >
-                    Full-width Widgets
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            
-            <Tabs defaultValue="all" className="flex-1 overflow-hidden flex flex-col">
-              <TabsList className="mb-4 w-full justify-start overflow-x-auto">
-                <TabsTrigger value="all" onClick={() => setSelectedCategory("all")}>All</TabsTrigger>
-                {widgetCategories.map(category => (
-                  <TabsTrigger
-                    key={category}
-                    value={category}
-                    onClick={() => setSelectedCategory(category)}
-                  >
-                    {category}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              
-              <div className="flex-1 overflow-y-auto pr-2">
-                <div className="space-y-3">
-                  {filteredWidgets.map((widget, index) => (
-                    <Card key={widget.id} className="cursor-pointer hover:border-primary">
-                      <CardHeader className="p-3">
-                        <CardTitle className="text-sm">{widget.name}</CardTitle>
-                        <CardDescription className="text-xs">
-                          {widget.defaultSize} · {widget.category}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-3 pt-0">
-                        <p className="text-xs text-muted-foreground">{widget.description}</p>
-                        <div className="flex justify-end mt-2">
-                          {layout.length > 0 && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => addWidgetToSection(widget.id, layout[0].id)}
-                            >
-                              <Plus className="mr-1 h-3 w-3" />
-                              Add
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        )}
+                      </Draggable>
+                    )
+                  })}
+                  {provided.placeholder} {/* Ensure placeholder is rendered */}
                 </div>
-              </div>
-            </Tabs>
-            
-            <div className="pt-4 border-t mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={resetLayout}
-                className="w-full"
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Reset Layout
-              </Button>
-            </div>
+              )}
+            </Droppable>
           </div>
-        </div>
+        ))}
       </div>
-    </div>
+    </DragDropContext>
   )
 }
