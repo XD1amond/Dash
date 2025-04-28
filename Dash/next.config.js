@@ -1,13 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
+  serverActions: true, // Moved from experimental
   images: {
     domains: ['localhost', 'via.placeholder.com'],
   },
-  experimental: {
-    serverActions: true,
-  },
+  // 'experimental' block can be removed if empty, or kept if other experimental features are added later.
+  // For now, let's remove it assuming serverActions was the only key.
   async rewrites() {
     return [
       {
