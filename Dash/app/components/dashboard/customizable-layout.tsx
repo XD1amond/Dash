@@ -218,9 +218,13 @@ export function CustomizableLayout({
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={cn(
-                    "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[100px] rounded-md border border-transparent p-2", // Add padding and transparent border
-                    snapshot.isDraggingOver ? "bg-primary/10 border-dashed border-primary ring-2 ring-primary/50" : "", // Enhanced drop zone highlight
-                    isEditing && !snapshot.isDraggingOver ? "border-dashed border-muted-foreground/20" : "" // Subtle border when editing overall (and not dragging over)
+                    "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[100px] rounded-md border p-2", // Keep padding, ensure border is always present for transitions
+                    // Drag-over state: Softer background, solid border
+                    snapshot.isDraggingOver ? "bg-blue-100/50 dark:bg-blue-900/30 border-solid border-blue-400 transition-colors duration-150" :
+                    // Default editing state: Dashed border, slightly darker on hover
+                    isEditing ? "border-dashed border-border/50 hover:border-border/80 transition-colors duration-150" :
+                    // Default non-editing state: Transparent border
+                    "border-transparent"
                   )}
                 >
                   {section.widgets.map((widgetId, index) => {
@@ -240,11 +244,13 @@ export function CustomizableLayout({
                           <div
                             ref={providedDraggable.innerRef}
                             {...providedDraggable.draggableProps}
+                            // Apply drag handle props here ONLY when editing
+                            {...(isEditing ? providedDraggable.dragHandleProps : {})}
                             className={cn(
-                              "relative group transition-shadow duration-200", // Add group for hover effects, transition
+                              "relative group transition-shadow transition-transform duration-200", // Add transition-transform
                               sizeClasses[widget.defaultSize],
                               snapshotDraggable.isDragging ? "opacity-80 shadow-xl rounded-md z-50" : "z-10", // Ensure dragging item is on top, add shadow/rounding
-                              isEditing ? "hover:shadow-md rounded-md" : "" // Add hover shadow when editing
+                              isEditing ? "hover:shadow-md rounded-md cursor-move" : "" // Add hover shadow and move cursor when editing
                             )}
                             style={{
                               // Required for smooth animation when items move
@@ -253,15 +259,8 @@ export function CustomizableLayout({
                           >
                             {isEditing && (
                               <>
-                                {/* Drag Handle - More visible */}
-                                <div
-                                  {...providedDraggable.dragHandleProps}
-                                  className="absolute -top-2 -left-2 p-1 bg-primary text-primary-foreground rounded-full shadow cursor-move z-30 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
-                                  aria-label="Drag widget"
-                                  tabIndex={0} // Make handle focusable
-                                >
-                                  <Move className="h-4 w-4" />
-                                </div>
+                                {/* Drag Handle - REMOVED */}
+
                                 {/* Remove Button - More visible */}
                                 <div className="absolute -top-2 -right-2 z-40">
                                   <Button

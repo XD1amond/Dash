@@ -1,4 +1,4 @@
-import React from 'react'; // Added React import
+import * as React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RevenueChart } from "@/components/dashboard/charts/revenue-chart"
 import { SalesChart } from "@/components/dashboard/charts/sales-chart"
@@ -18,19 +18,21 @@ export function createOverviewWidgets(
       id: "revenue-chart",
       name: "Revenue Trends",
       description: "Revenue trends over the selected period",
-      category: "Overview", // Changed category for clarity
-      component: (
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Revenue</CardTitle>
-            <CardDescription>
-              Revenue trends over the selected period
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <RevenueChart data={revenueData} />
-          </CardContent>
-        </Card>
+      category: "Overview",
+      component: React.createElement(
+        Card,
+        { className: "col-span-4" },
+        React.createElement(
+          CardHeader,
+          null,
+          React.createElement(CardTitle, null, "Revenue"),
+          React.createElement(CardDescription, null, "Revenue trends over the selected period")
+        ),
+        React.createElement(
+          CardContent,
+          { className: "h-[300px]" },
+          React.createElement(RevenueChart, { data: revenueData })
+        )
       ),
       defaultSize: "large"
     },
@@ -39,18 +41,20 @@ export function createOverviewWidgets(
       name: "Sales Distribution",
       description: "Sales distribution by category",
       category: "Overview",
-      component: (
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Sales</CardTitle>
-            <CardDescription>
-              Sales distribution by category
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <SalesChart data={salesData} />
-          </CardContent>
-        </Card>
+      component: React.createElement(
+        Card,
+        { className: "col-span-3" },
+        React.createElement(
+          CardHeader,
+          null,
+          React.createElement(CardTitle, null, "Sales"),
+          React.createElement(CardDescription, null, "Sales distribution by category")
+        ),
+        React.createElement(
+          CardContent,
+          { className: "h-[300px]" },
+          React.createElement(SalesChart, { data: salesData })
+        )
       ),
       defaultSize: "medium"
     },
@@ -59,18 +63,20 @@ export function createOverviewWidgets(
       name: "Visitors",
       description: "Website traffic sources",
       category: "Overview",
-      component: (
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Visitors</CardTitle>
-            <CardDescription>
-              Website traffic sources
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <VisitorsChart data={visitorsData} />
-          </CardContent>
-        </Card>
+      component: React.createElement(
+        Card,
+        { className: "col-span-3" },
+        React.createElement(
+          CardHeader,
+          null,
+          React.createElement(CardTitle, null, "Visitors"),
+          React.createElement(CardDescription, null, "Website traffic sources")
+        ),
+        React.createElement(
+          CardContent,
+          { className: "h-[300px]" },
+          React.createElement(VisitorsChart, { data: visitorsData })
+        )
       ),
       defaultSize: "medium"
     },
@@ -79,18 +85,20 @@ export function createOverviewWidgets(
       name: "Conversion Rate",
       description: "Conversion rate over time",
       category: "Overview",
-      component: (
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Conversion Rate</CardTitle>
-            <CardDescription>
-              Conversion rate over time
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ConversionChart data={conversionData} />
-          </CardContent>
-        </Card>
+      component: React.createElement(
+        Card,
+        { className: "col-span-4" },
+        React.createElement(
+          CardHeader,
+          null,
+          React.createElement(CardTitle, null, "Conversion Rate"),
+          React.createElement(CardDescription, null, "Conversion rate over time")
+        ),
+        React.createElement(
+          CardContent,
+          { className: "h-[300px]" },
+          React.createElement(ConversionChart, { data: conversionData })
+        )
       ),
       defaultSize: "large"
     }
@@ -100,8 +108,8 @@ export function createOverviewWidgets(
 // Define default layout for overview widgets
 export const defaultOverviewLayout: LayoutSection[] = [
   {
-    id: "overview-metrics", // Renamed ID for clarity
+    id: "overview-metrics",
     title: "Overview Metrics",
-    widgets: ["revenue-chart", "sales-chart", "visitors-chart", "conversion-chart"] // Use IDs defined above
+    widgets: ["revenue-chart", "sales-chart", "visitors-chart", "conversion-chart"]
   }
 ];

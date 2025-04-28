@@ -4,13 +4,20 @@ import React, { useState, useEffect, useCallback } from "react" // Added React a
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Download, Pencil, X, Plus, Move, Save, ChevronLeft } from "lucide-react" // Ensure ChevronLeft is imported
+import { Download, Pencil, X, Plus, Move, Save, ChevronLeft, Filter, Search } from "lucide-react" // Added Filter and Search
 import { DateRangePicker } from "@/components/ui/date-range-picker"
+import { Input } from "@/components/ui/input" // Added Input import
 // Removed StatCard import as it's used within widgets
 // Removed Chart imports as they are used within widgets
 import { CustomizableLayout, WidgetDefinition, LayoutSection } from "@/components/dashboard/customizable-layout" // Ensure LayoutSection is imported
 import { cn } from "@/lib/utils"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd" // Added dnd imports and DropResult type
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem
+} from "@/components/ui/dropdown-menu" // Added dropdown menu imports
 
 // Import widget modules & layouts
 import { createStatCardWidgets } from "@/components/dashboard/widgets/stat-card-widgets"
@@ -105,6 +112,9 @@ export function DashboardOverview({
   const [sidebarTargetInstanceId, setSidebarTargetInstanceId] = useState<string | null>(null);
   const [sidebarTargetSectionId, setSidebarTargetSectionId] = useState<string | null>(null);
   const [sidebarAvailableWidgets, setSidebarAvailableWidgets] = useState<WidgetDefinition[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTab, setSelectedTab] = useState<string | null>(null);
+  const [sizeFilter, setSizeFilter] = useState<string | null>(null);
 
   // --- Event Handlers ---
   const handleDateRangeChange = (range: DateRange | undefined) => {
@@ -139,15 +149,33 @@ export function DashboardOverview({
     const currentLayout = instanceId === 'header' ? headerLayoutState : tabLayoutStates[instanceId];
     const currentWidgetsInSection = currentLayout.find(s => s.id === sectionId)?.widgets || [];
 
-    const filteredWidgets = availableWidgetsForArea.filter(
-      widget => !currentWidgetsInSection.includes(widget.id)
-    );
+    // For header (Key Performance Indicators), allow any small widget regardless of section
+    let filteredWidgets;
+    if (instanceId === 'header') {
+      filteredWidgets = Object.values(availableWidgetsMap)
+        .flat()
+        .filter(widget =>
+          widget.defaultSize === "small" &&
+          !currentWidgetsInSection.includes(widget.id)
+        );
+    } else {
+      filteredWidgets = availableWidgetsForArea.filter(
+        widget => !currentWidgetsInSection.includes(widget.id)
+      );
+    }
 
     setSidebarTargetInstanceId(instanceId);
     setSidebarTargetSectionId(sectionId);
     setSidebarAvailableWidgets(filteredWidgets);
     setSidebarOpen(true);
-  }, [isEditing, headerLayoutState, tabLayoutStates]); // Dependencies
+    
+    // Set the initial tab based on the instance
+    if (instanceId === 'header' || instanceId === 'overview') {
+      setSelectedTab(null); // Show all tabs for header and overview
+    } else {
+      setSelectedTab(instanceId); // Show only the relevant tab for other sections
+    }
+  }, [isEditing, headerLayoutState, tabLayoutStates, availableWidgetsMap]); // Dependencies
 
   // Called by the sidebar to add a widget OR when dragging from library
   const addWidgetToTarget = useCallback((widgetId: string, targetInstanceId: string, targetSectionId: string, targetIndex?: number) => {
@@ -185,6 +213,9 @@ export function DashboardOverview({
     setSidebarTargetInstanceId(null);
     setSidebarTargetSectionId(null);
     setSidebarAvailableWidgets([]);
+    setSearchQuery("");
+    setSizeFilter(null);
+    setSelectedTab(null);
   }, []);
 
   // Toggle Edit Mode - also closes sidebar
@@ -264,7 +295,7 @@ export function DashboardOverview({
         </div>
 
         {/* Customizable Header Area */}
-        <div className={cn("mb-6", isEditing ? "outline outline-2 outline-dashed outline-blue-500 rounded-md" : "")}>
+        <div className={cn("mb-6 rounded-lg", isEditing ? "bg-muted/10 ring-1 ring-blue-300/50 transition-all duration-200" : "")}>
           {/* Note: Outline applied to wrapper, padding handled by CustomizableLayout's internal wrapper */}
           <CustomizableLayout
             instanceId="header"
@@ -293,7 +324,7 @@ export function DashboardOverview({
           {/* Render TabsContent dynamically */}
           {Object.keys(tabLayoutStates).map(tabId => (
             <TabsContent key={tabId} value={tabId} className="mt-0"> {/* Ensure no top margin from TabsContent */}
-               <div className={cn("space-y-4", isEditing && activeTab === tabId ? "outline outline-2 outline-dashed outline-blue-500 rounded-md" : "")}>
+               <div className={cn("space-y-4 rounded-lg", isEditing && activeTab === tabId ? "bg-muted/10 ring-1 ring-blue-300/50 transition-all duration-200" : "")}>
                  <CustomizableLayout
                    instanceId={tabId}
                    isEditing={isEditing}
@@ -332,7 +363,90 @@ export function DashboardOverview({
                Drag widgets to the target section or click the Add button below.
             </p>
 
-            {/* TODO: Add Search/Filter controls here if needed */}
+            {/* Search, Tabs, and Filter controls */}
+            <div className="space-y-4 mb-4">
+              {/* Search input */}
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search widgets..."
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              
+              {/* Tabs for sections */}
+              <Tabs
+                value={selectedTab || "all"}
+                onValueChange={(value) => setSelectedTab(value === "all" ? null : value)}
+                className="w-full"
+              >
+                <TabsList className="w-full flex flex-wrap h-auto py-1">
+                  <TabsTrigger value="all" className="flex-grow">All</TabsTrigger>
+                  {(sidebarTargetInstanceId === 'header' || sidebarTargetInstanceId === 'overview') ? (
+                    // Show all tabs for header and overview
+                    <>
+                      <TabsTrigger value="business" className="flex-grow">Business</TabsTrigger>
+                      <TabsTrigger value="website" className="flex-grow">Website</TabsTrigger>
+                      <TabsTrigger value="marketing" className="flex-grow">Marketing</TabsTrigger>
+                      <TabsTrigger value="products" className="flex-grow">Products</TabsTrigger>
+                      <TabsTrigger value="customers" className="flex-grow">Customers</TabsTrigger>
+                      <TabsTrigger value="analytics" className="flex-grow">Analytics</TabsTrigger>
+                      <TabsTrigger value="performance" className="flex-grow">Performance</TabsTrigger>
+                      <TabsTrigger value="forecast" className="flex-grow">Forecast</TabsTrigger>
+                    </>
+                  ) : (
+                    // Show only the relevant tab for other sections
+                    <TabsTrigger value={sidebarTargetInstanceId || ""} className="flex-grow">
+                      {sidebarTargetInstanceId ? sidebarTargetInstanceId.charAt(0).toUpperCase() + sidebarTargetInstanceId.slice(1) : ""}
+                    </TabsTrigger>
+                  )}
+                </TabsList>
+              </Tabs>
+              
+              {/* Size filter */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    {sizeFilter ? `Size: ${sizeFilter}` : "Filter by size"}
+                    <Filter className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuCheckboxItem
+                    checked={sizeFilter === null}
+                    onCheckedChange={() => setSizeFilter(null)}
+                  >
+                    All sizes
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={sizeFilter === "small"}
+                    onCheckedChange={() => setSizeFilter(sizeFilter === "small" ? null : "small")}
+                  >
+                    Small
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={sizeFilter === "medium"}
+                    onCheckedChange={() => setSizeFilter(sizeFilter === "medium" ? null : "medium")}
+                  >
+                    Medium
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={sizeFilter === "large"}
+                    onCheckedChange={() => setSizeFilter(sizeFilter === "large" ? null : "large")}
+                  >
+                    Large
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={sizeFilter === "full"}
+                    onCheckedChange={() => setSizeFilter(sizeFilter === "full" ? null : "full")}
+                  >
+                    Full
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
             <div className="flex-1 overflow-y-auto pr-2">
               {/* Droppable area for the library items */}
@@ -346,7 +460,24 @@ export function DashboardOverview({
                     {sidebarAvailableWidgets.length === 0 && sidebarTargetSectionId && (
                        <p className="text-sm text-muted-foreground italic text-center py-4">No more widgets available for this section.</p>
                     )}
-                    {sidebarAvailableWidgets.map((widget, index) => (
+                    {sidebarAvailableWidgets
+                      .filter(widget => {
+                        // Apply search filter
+                        const matchesSearch = searchQuery === "" ||
+                          widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          widget.description.toLowerCase().includes(searchQuery.toLowerCase());
+                        
+                        // Apply tab filter
+                        const matchesTab = selectedTab === null ||
+                          widget.category.toLowerCase() === selectedTab.toLowerCase();
+                        
+                        // Apply size filter
+                        const matchesSize = sizeFilter === null ||
+                          widget.defaultSize === sizeFilter;
+                        
+                        return matchesSearch && matchesTab && matchesSize;
+                      })
+                      .map((widget, index) => (
                       <Draggable key={widget.id} draggableId={`library-${widget.id}`} index={index}>
                         {(providedDraggable, snapshotDraggable) => (
                           // Wrap with div for ref and props
@@ -388,6 +519,24 @@ export function DashboardOverview({
                         )}
                       </Draggable>
                     ))}
+                    {sidebarAvailableWidgets.length > 0 &&
+                     sidebarAvailableWidgets.filter(widget => {
+                       const matchesSearch = searchQuery === "" ||
+                         widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         widget.description.toLowerCase().includes(searchQuery.toLowerCase());
+                       
+                       const matchesTab = selectedTab === null ||
+                         widget.category.toLowerCase() === selectedTab.toLowerCase();
+                       
+                       const matchesSize = sizeFilter === null ||
+                         widget.defaultSize === sizeFilter;
+                       
+                       return matchesSearch && matchesTab && matchesSize;
+                     }).length === 0 && (
+                      <p className="text-sm text-muted-foreground italic text-center py-4">
+                        No widgets match your filters.
+                      </p>
+                    )}
                     {provided.placeholder}
                   </div>
                 )}
