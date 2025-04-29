@@ -38,6 +38,9 @@
     "prepublishOnly": "npm run build:package"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.3.4",
     "@portabletext/react": "^3.2.1",
@@ -68,7 +71,7 @@
     "date-fns": "^3.3.1",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
-    "next": "14.2.4",
+    "next": "^14.0.0",
     "next-sanity": "^9.10.2",
     "next-themes": "^0.2.1",
     "react": "^18.2.0",
