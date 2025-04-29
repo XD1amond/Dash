@@ -274,7 +274,6 @@ export function CustomizableLayout({
                      onRemoveWidget={removeWidgetFromSection} // Pass remove handler
                    />
                 ))}
-                {/* dnd-kit doesn't use a placeholder div like @hello-pangea/dnd */}
               </div>
             </SortableContext>
           </div>
@@ -300,6 +299,7 @@ interface SortableWidgetProps {
   sectionId: string;
   onRemoveWidget: (widgetId: string, sectionId: string, index: number) => void; // Use index from useSortable if needed, or adjust signature
 }
+
 
 function SortableWidget({ id, widget, isEditing, sectionId, onRemoveWidget }: SortableWidgetProps) {
   const {
@@ -337,7 +337,7 @@ function SortableWidget({ id, widget, isEditing, sectionId, onRemoveWidget }: So
         "relative group", // Base classes
         sizeClasses[widget.defaultSize],
         isEditing ? "cursor-grab" : "", // Use grab cursor when editable
-        isDragging ? "cursor-grabbing" : "" // Use grabbing cursor when dragging
+        isDragging ? "cursor-grabbing !important" : "" // Use grabbing cursor when dragging, !important might be needed
         // Removed hover:shadow-md as shadow is applied during drag
       )}
       // Spread attributes for accessibility etc.
@@ -350,7 +350,7 @@ function SortableWidget({ id, widget, isEditing, sectionId, onRemoveWidget }: So
       {widget.component}
 
       {/* Controls shown only when editing */}
-      {isEditing && (
+      {isEditing && !isDragging && ( // Hide controls while dragging this item
         <>
           {/* Optional: Explicit Drag Handle (can apply listeners here instead of whole div) */}
           {/* <button {...listeners} className="absolute top-1 left-1 z-20 p-1 cursor-grab"><GripVertical className="h-4 w-4" /></button> */}
@@ -387,25 +387,17 @@ interface WidgetOverlayProps {
 function WidgetOverlayContent({ widget, isEditing }: WidgetOverlayProps) {
     if (!widget) return null;
 
-    const sizeClasses = {
-        small: "md:col-span-1",
-        medium: "md:col-span-1 lg:col-span-2",
-        large: "md:col-span-2 lg:col-span-2",
-        full: "md:col-span-2 lg:col-span-4"
-    };
-
     // Render a simplified version or the full component for the overlay
     // Apply necessary classes for sizing and basic styling
+    // Let the component itself dictate its size within the overlay container
     return (
         <div className={cn(
-            "rounded-md bg-background shadow-lg border", // Overlay specific styles
-            sizeClasses[widget.defaultSize]
+            "rounded-md bg-background shadow-xl border opacity-95 cursor-grabbing", // Overlay specific styles, slightly less transparent
+            // Do not apply explicit width/col-span here, let the component render naturally
+            // The DragOverlay should ideally capture the original node's size
         )}>
-             {/* You might want a placeholder or the actual component */}
-             {/* Using the actual component might be heavy, consider a lighter representation */}
+             {/* Render the actual component in the overlay */}
              {widget.component}
-             {/* Add a grabbing cursor style */}
-             <style>{`.cursor-grabbing { cursor: grabbing !important; }`}</style>
         </div>
     );
 }

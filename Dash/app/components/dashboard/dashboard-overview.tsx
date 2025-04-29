@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input" // Added Input import
 // Removed Chart imports as they are used within widgets
 import { CustomizableLayout, WidgetDefinition, LayoutSection } from "@/components/dashboard/customizable-layout" // Ensure LayoutSection is imported
 import { cn } from "@/lib/utils"
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd" // Added dnd imports and DropResult type
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -227,47 +226,14 @@ export function DashboardOverview({
     }
   }, [isEditing, closeSidebar]);
 
-  // --- Drag and Drop Handler for Library -> Dashboard ---
-  const onDragEnd = useCallback((result: DropResult) => {
-    const { source, destination, draggableId } = result;
-
-    // Dropped outside a valid destination
-    if (!destination) {
-      return;
-    }
-
-    // Ensure it's dragging from the library to a dashboard section
-    if (source.droppableId === "widget-library" && destination.droppableId !== "widget-library") {
-      const widgetId = draggableId.replace("library-", ""); // Extract widget ID
-      const targetInstanceId = Object.keys(tabLayoutStates).find(key => tabLayoutStates[key].some(sec => sec.id === destination.droppableId)) || (headerLayoutState.some(sec => sec.id === destination.droppableId) ? 'header' : null);
-      const targetSectionId = destination.droppableId;
-      const targetIndex = destination.index;
-
-      if (widgetId && targetInstanceId && targetSectionId) {
-         // // Check if the drop target instance matches the sidebar target (if open)
-         // // This prevents adding to a section that wasn't explicitly selected via click
-         // if (sidebarOpen && (sidebarTargetInstanceId !== targetInstanceId || sidebarTargetSectionId !== targetSectionId)) {
-         //    console.warn("Drag target does not match selected area. Ignoring drop.");
-         //    // Optionally provide user feedback here
-         //    return;
-         // }
-         // If sidebar isn't open, or if target matches, proceed to add
-         // --- Allow adding even if target doesn't match selected area ---
-         addWidgetToTarget(widgetId, targetInstanceId, targetSectionId, targetIndex);
-      } else {
-          console.error("Could not determine target instance or section for drop");
-      }
-    }
-    // Internal reordering within a CustomizableLayout is handled by its own onDragEnd -> onLayoutChange
-  }, [addWidgetToTarget, headerLayoutState, tabLayoutStates, sidebarOpen, sidebarTargetInstanceId, sidebarTargetSectionId]);
+  // Removed the onDragEnd handler previously used for @hello-pangea/dnd library dragging
 
 
   return (
-    // Wrap relevant parts in DragDropContext for library -> dashboard drag
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="relative space-y-6">
-        {/* Header Section (Title, Buttons) */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    // Removed DragDropContext wrapper
+    <div className="relative space-y-6">
+      {/* Header Section (Title, Buttons) */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
             <p className="text-muted-foreground">
@@ -449,104 +415,83 @@ export function DashboardOverview({
               </DropdownMenu>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-2">
-              {/* Droppable area for the library items */}
-              <Droppable droppableId="widget-library" type="WIDGET" isDropDisabled={true}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="space-y-3"
-                  >
-                    {sidebarAvailableWidgets.length === 0 && sidebarTargetSectionId && (
-                       <p className="text-sm text-muted-foreground italic text-center py-4">No more widgets available for this section.</p>
-                    )}
-                    {sidebarAvailableWidgets
-                      .filter(widget => {
-                        // Apply search filter
-                        const matchesSearch = searchQuery === "" ||
-                          widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          widget.description.toLowerCase().includes(searchQuery.toLowerCase());
-                        
-                        // Apply tab filter
-                        const matchesTab = selectedTab === null ||
-                          widget.category.toLowerCase() === selectedTab.toLowerCase();
-                        
-                        // Apply size filter
-                        const matchesSize = sizeFilter === null ||
-                          widget.defaultSize === sizeFilter;
-                        
-                        return matchesSearch && matchesTab && matchesSize;
-                      })
-                      .map((widget, index) => (
-                      <Draggable key={widget.id} draggableId={`library-${widget.id}`} index={index}>
-                        {(providedDraggable, snapshotDraggable) => (
-                          // Wrap with div for ref and props
-                          <div
-                             ref={providedDraggable.innerRef}
-                             {...providedDraggable.draggableProps}
-                             {...providedDraggable.dragHandleProps} // Apply handle props here
-                             style={{...providedDraggable.draggableProps.style}} // Apply style for smooth drag
-                             className={cn(snapshotDraggable.isDragging ? "opacity-80 shadow-lg rounded-md" : "")} // Style during drag
-                           >
-                            <Card className="cursor-grab hover:border-primary">
-                              <CardHeader className="p-3">
-                                <CardTitle className="text-sm">{widget.name}</CardTitle>
-                                <CardDescription className="text-xs">
-                                  {widget.defaultSize} · {widget.category}
-                                </CardDescription>
-                              </CardHeader>
-                              <CardContent className="p-3 pt-0">
-                                <p className="text-xs text-muted-foreground">{widget.description}</p>
-                                <div className="flex justify-end mt-2">
-                                  <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => {
-                                        if (sidebarTargetInstanceId && sidebarTargetSectionId) {
-                                            addWidgetToTarget(widget.id, sidebarTargetInstanceId, sidebarTargetSectionId);
-                                        }
-                                    }}
-                                    disabled={!sidebarTargetSectionId}
-                                    aria-label={`Add ${widget.name} widget`}
-                                  >
-                                    <Plus className="mr-1 h-3 w-3" />
-                                    Add
-                                  </Button>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {sidebarAvailableWidgets.length > 0 &&
-                     sidebarAvailableWidgets.filter(widget => {
-                       const matchesSearch = searchQuery === "" ||
-                         widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         widget.description.toLowerCase().includes(searchQuery.toLowerCase());
-                       
-                       const matchesTab = selectedTab === null ||
-                         widget.category.toLowerCase() === selectedTab.toLowerCase();
-                       
-                       const matchesSize = sizeFilter === null ||
-                         widget.defaultSize === sizeFilter;
-                       
-                       return matchesSearch && matchesTab && matchesSize;
-                     }).length === 0 && (
-                      <p className="text-sm text-muted-foreground italic text-center py-4">
-                        No widgets match your filters.
-                      </p>
-                    )}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
+            <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+              {/* Removed Droppable wrapper */}
+              {sidebarAvailableWidgets.length === 0 && sidebarTargetSectionId && (
+                 <p className="text-sm text-muted-foreground italic text-center py-4">No more widgets available for this section.</p>
+              )}
+              {sidebarAvailableWidgets
+                .filter(widget => {
+                  // Apply search filter
+                  const matchesSearch = searchQuery === "" ||
+                    widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    widget.description.toLowerCase().includes(searchQuery.toLowerCase());
+                  
+                  // Apply tab filter
+                  const matchesTab = selectedTab === null ||
+                    widget.category.toLowerCase() === selectedTab.toLowerCase();
+                  
+                  // Apply size filter
+                  const matchesSize = sizeFilter === null ||
+                    widget.defaultSize === sizeFilter;
+                  
+                  return matchesSearch && matchesTab && matchesSize;
+                })
+                .map((widget, index) => (
+                // Removed Draggable wrapper
+                <div key={widget.id}> {/* Use widget.id for key */}
+                  <Card className="hover:border-primary"> {/* Removed cursor-grab */}
+                    <CardHeader className="p-3">
+                      <CardTitle className="text-sm">{widget.name}</CardTitle>
+                      <CardDescription className="text-xs">
+                        {widget.defaultSize} · {widget.category}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-3 pt-0">
+                      <p className="text-xs text-muted-foreground">{widget.description}</p>
+                      <div className="flex justify-end mt-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                              if (sidebarTargetInstanceId && sidebarTargetSectionId) {
+                                  addWidgetToTarget(widget.id, sidebarTargetInstanceId, sidebarTargetSectionId);
+                              }
+                          }}
+                          disabled={!sidebarTargetSectionId}
+                          aria-label={`Add ${widget.name} widget`}
+                        >
+                          <Plus className="mr-1 h-3 w-3" />
+                          Add
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+              {sidebarAvailableWidgets.length > 0 &&
+               sidebarAvailableWidgets.filter(widget => {
+                 const matchesSearch = searchQuery === "" ||
+                   widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                   widget.description.toLowerCase().includes(searchQuery.toLowerCase());
+                 
+                 const matchesTab = selectedTab === null ||
+                   widget.category.toLowerCase() === selectedTab.toLowerCase();
+                 
+                 const matchesSize = sizeFilter === null ||
+                   widget.defaultSize === sizeFilter;
+                 
+                 return matchesSearch && matchesTab && matchesSize;
+               }).length === 0 && (
+                <p className="text-sm text-muted-foreground italic text-center py-4">
+                  No widgets match your filters.
+                </p>
+              )}
+              {/* Removed placeholder */}
             </div>
           </div>
         </div>
         {/* --- End Sidebar --- */}
       </div>
-    </DragDropContext>
   )
 }
