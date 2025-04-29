@@ -244,14 +244,15 @@ export function DashboardOverview({
       const targetIndex = destination.index;
 
       if (widgetId && targetInstanceId && targetSectionId) {
-         // Check if the drop target instance matches the sidebar target (if open)
-         // This prevents adding to a section that wasn't explicitly selected via click
-         if (sidebarOpen && (sidebarTargetInstanceId !== targetInstanceId || sidebarTargetSectionId !== targetSectionId)) {
-            console.warn("Drag target does not match selected area. Ignoring drop.");
-            // Optionally provide user feedback here
-            return;
-         }
+         // // Check if the drop target instance matches the sidebar target (if open)
+         // // This prevents adding to a section that wasn't explicitly selected via click
+         // if (sidebarOpen && (sidebarTargetInstanceId !== targetInstanceId || sidebarTargetSectionId !== targetSectionId)) {
+         //    console.warn("Drag target does not match selected area. Ignoring drop.");
+         //    // Optionally provide user feedback here
+         //    return;
+         // }
          // If sidebar isn't open, or if target matches, proceed to add
+         // --- Allow adding even if target doesn't match selected area ---
          addWidgetToTarget(widgetId, targetInstanceId, targetSectionId, targetIndex);
       } else {
           console.error("Could not determine target instance or section for drop");
@@ -413,7 +414,7 @@ export function DashboardOverview({
                     <Filter className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
+                <DropdownMenuContent className="w-56 z-[70]"> {/* Added higher z-index */}
                   <DropdownMenuCheckboxItem
                     checked={sizeFilter === null}
                     onCheckedChange={() => setSizeFilter(null)}

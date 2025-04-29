@@ -218,7 +218,9 @@ export function CustomizableLayout({
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={cn(
-                    "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[100px] rounded-md border p-2", // Keep padding, ensure border is always present for transitions
+                    "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[100px] rounded-md border p-2",
+                    // Apply column flow only for the header instance to prevent vertical shifting
+                    instanceId === 'header' && "grid-flow-col",
                     // Drag-over state: Softer background, solid border
                     snapshot.isDraggingOver ? "bg-blue-100/50 dark:bg-blue-900/30 border-solid border-blue-400 transition-colors duration-150" :
                     // Default editing state: Dashed border, slightly darker on hover
