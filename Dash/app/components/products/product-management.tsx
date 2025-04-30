@@ -22,8 +22,10 @@ import {
   Layers,
   BarChart4,
   Settings,
-  ArrowUpDown
+  ArrowUpDown,
+  FileDown
 } from "lucide-react"
+import { exportToCsv } from "@/lib/export-utils"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,7 +69,7 @@ export function ProductManagement({
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
-  const [view, setView] = useState<"grid" | "list">("grid")
+  const [view, setView] = useState<"grid" | "list">("list")
   const [productSortField, setProductSortField] = useState<string>("name")
   const [productSortDirection, setProductSortDirection] = useState<"asc" | "desc">("asc")
 
@@ -146,10 +148,43 @@ export function ProductManagement({
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button variant="outline" onClick={onExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => {
+                if (selectedProducts.length > 0) {
+                  // Export only selected products
+                  const selectedProductsData = products.filter(product => selectedProducts.includes(product.id));
+                  exportToCsv(selectedProductsData, 'selected-products.csv', {
+                    id: 'ID',
+                    name: 'Name',
+                    category: 'Category',
+                    price: 'Price',
+                    inventory: 'Inventory'
+                  });
+                } else {
+                  // No products selected, export all filtered products
+                  exportToCsv(filteredProducts, 'all-products.csv', {
+                    id: 'ID',
+                    name: 'Name',
+                    category: 'Category',
+                    price: 'Price',
+                    inventory: 'Inventory'
+                  });
+                }
+              }}>
+                <FileDown className="mr-2 h-4 w-4" />
+                {selectedProducts.length > 0
+                  ? `Export ${selectedProducts.length} Selected Products`
+                  : "Export All Products"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button onClick={onAddProduct}>
             <Plus className="mr-2 h-4 w-4" />
             Add Product
@@ -273,7 +308,16 @@ export function ProductManagement({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => onBulkAction && onBulkAction("export", selectedProducts)}>
+                <DropdownMenuItem onClick={() => {
+                  const selectedProductsData = products.filter(product => selectedProducts.includes(product.id));
+                  exportToCsv(selectedProductsData, 'selected-products.csv', {
+                    id: 'ID',
+                    name: 'Name',
+                    category: 'Category',
+                    price: 'Price',
+                    inventory: 'Inventory'
+                  });
+                }}>
                   Export Selected
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onBulkAction && onBulkAction("category", selectedProducts)}>

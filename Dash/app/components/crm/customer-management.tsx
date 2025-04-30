@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Search,
   Filter,
@@ -21,8 +22,10 @@ import {
   MoreHorizontal,
   BarChart4,
   ShoppingBag,
-  ArrowUpDown
+  ArrowUpDown,
+  FileDown
 } from "lucide-react"
+import { exportToCsv } from "@/lib/export-utils"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,6 +71,7 @@ export function CustomerManagement({
   const [view, setView] = useState<"list" | "segments">("list")
   const [sortField, setSortField] = useState<string>("name")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -82,6 +86,24 @@ export function CustomerManagement({
     } else {
       setSortField(field)
       setSortDirection("asc")
+    }
+  }
+
+  // Handle select customer
+  const handleSelectCustomer = (customerId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCustomers(prev => [...prev, customerId])
+    } else {
+      setSelectedCustomers(prev => prev.filter(id => id !== customerId))
+    }
+  }
+
+  // Handle select all
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedCustomers(filteredCustomers.map(customer => customer.id))
+    } else {
+      setSelectedCustomers([])
     }
   }
 
@@ -131,10 +153,47 @@ export function CustomerManagement({
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button variant="outline" onClick={onExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => {
+                if (selectedCustomers.length > 0) {
+                  // Export only selected customers
+                  const selectedCustomersData = customers.filter(customer => selectedCustomers.includes(customer.id));
+                  exportToCsv(selectedCustomersData, 'selected-customers.csv', {
+                    id: 'ID',
+                    name: 'Name',
+                    email: 'Email',
+                    phone: 'Phone',
+                    totalOrders: 'Total Orders',
+                    totalSpent: 'Total Spent',
+                    segment: 'Segment'
+                  });
+                } else {
+                  // No customers selected, export all filtered customers
+                  exportToCsv(filteredCustomers, 'all-customers.csv', {
+                    id: 'ID',
+                    name: 'Name',
+                    email: 'Email',
+                    phone: 'Phone',
+                    totalOrders: 'Total Orders',
+                    totalSpent: 'Total Spent',
+                    segment: 'Segment'
+                  });
+                }
+              }}>
+                <FileDown className="mr-2 h-4 w-4" />
+                {selectedCustomers.length > 0
+                  ? `Export ${selectedCustomers.length} Selected Customers`
+                  : "Export All Customers"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button onClick={onAddCustomer}>
             <UserPlus className="mr-2 h-4 w-4" />
             Add Customer
@@ -253,6 +312,12 @@ export function CustomerManagement({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/50">
+                      <th className="p-2 text-left font-medium">
+                        <Checkbox
+                          checked={selectedCustomers.length === filteredCustomers.length && filteredCustomers.length > 0}
+                          onCheckedChange={handleSelectAll}
+                        />
+                      </th>
                       <th className="p-2 text-left font-medium">Name</th>
                       <th className="p-2 text-left font-medium">Email</th>
                       <th className="p-2 text-left font-medium">Phone</th>
@@ -266,6 +331,12 @@ export function CustomerManagement({
                     {sortedCustomers.length > 0 ? (
                       sortedCustomers.map((customer) => (
                         <tr key={customer.id} className="border-b">
+                          <td className="p-2">
+                            <Checkbox
+                              checked={selectedCustomers.includes(customer.id)}
+                              onCheckedChange={(checked) => handleSelectCustomer(customer.id, checked === true)}
+                            />
+                          </td>
                           <td className="p-2 font-medium">{customer.name}</td>
                           <td className="p-2">{customer.email}</td>
                           <td className="p-2">{customer.phone || "—"}</td>
@@ -317,7 +388,7 @@ export function CustomerManagement({
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={7} className="p-4 text-center">
+                        <td colSpan={8} className="p-4 text-center">
                           No customers found
                         </td>
                       </tr>
@@ -327,6 +398,35 @@ export function CustomerManagement({
               </div>
             </CardContent>
           </Card>
+
+          {selectedCustomers.length > 0 && (
+            <div className="flex items-center gap-2 bg-muted p-4 rounded-md">
+              <span className="text-sm font-medium">{selectedCustomers.length} customers selected</span>
+              <div className="flex-1"></div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const selectedCustomersData = customers.filter(customer => selectedCustomers.includes(customer.id));
+                  exportToCsv(selectedCustomersData, 'selected-customers.csv', {
+                    id: 'ID',
+                    name: 'Name',
+                    email: 'Email',
+                    phone: 'Phone',
+                    totalOrders: 'Total Orders',
+                    totalSpent: 'Total Spent',
+                    segment: 'Segment'
+                  });
+                }}
+              >
+                <FileDown className="mr-2 h-4 w-4" />
+                Export Selected
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedCustomers([])}>
+                Clear Selection
+              </Button>
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="segments" className="space-y-4">

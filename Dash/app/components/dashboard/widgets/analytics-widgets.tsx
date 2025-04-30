@@ -1,9 +1,62 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Download, Code, Image, Copy, Check } from "lucide-react"
+import { exportChartAsPng, getChartEmbedCode, copyToClipboard } from "@/lib/export-utils"
 
 // Define the widget size type
 type WidgetSize = "small" | "medium" | "large" | "full";
+
+// Export Menu Component
+interface ExportMenuProps {
+  chartId: string;
+  title: string;
+}
+
+const ExportMenu = ({ chartId, title }: ExportMenuProps) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyEmbed = async () => {
+    const embedCode = getChartEmbedCode(chartId);
+    const success = await copyToClipboard(embedCode);
+    
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="ml-auto">
+          <Download className="h-4 w-4 mr-2" />
+          Export
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => exportChartAsPng(chartId, `${title.toLowerCase().replace(/\s+/g, '-')}.png`)}>
+          <Image className="h-4 w-4 mr-2" />
+          Export as PNG
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleCopyEmbed}>
+          <Code className="h-4 w-4 mr-2" />
+          {copied ? (
+            <>
+              <Check className="h-4 w-4 mr-2 text-green-500" />
+              Copied!
+            </>
+          ) : (
+            "Copy Embed Code"
+          )}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export const analyticsWidgets = [
   {
@@ -13,14 +66,17 @@ export const analyticsWidgets = [
     category: "Analytics",
     component: (
       <Card className="col-span-3">
-        <CardHeader>
-          <CardTitle>Sales Funnel</CardTitle>
-          <CardDescription>
-            Conversion funnel from visit to purchase
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center">
+          <div>
+            <CardTitle>Sales Funnel</CardTitle>
+            <CardDescription>
+              Conversion funnel from visit to purchase
+            </CardDescription>
+          </div>
+          <ExportMenu chartId="sales-funnel-chart" title="Sales Funnel" />
         </CardHeader>
         <CardContent className="h-[300px]">
-          <div className="space-y-8 pt-4">
+          <div id="sales-funnel-chart" className="space-y-8 pt-4">
             <div className="relative">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-medium">Visits</span>
@@ -69,14 +125,17 @@ export const analyticsWidgets = [
     category: "Analytics",
     component: (
       <Card className="col-span-4">
-        <CardHeader>
-          <CardTitle>Cohort Analysis</CardTitle>
-          <CardDescription>
-            Customer retention by cohort
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center">
+          <div>
+            <CardTitle>Cohort Analysis</CardTitle>
+            <CardDescription>
+              Customer retention by cohort
+            </CardDescription>
+          </div>
+          <ExportMenu chartId="cohort-analysis-chart" title="Cohort Analysis" />
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div id="cohort-analysis-chart" className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr>
@@ -159,14 +218,17 @@ export const analyticsWidgets = [
     category: "Analytics",
     component: (
       <Card className="col-span-3">
-        <CardHeader>
-          <CardTitle>A/B Testing Results</CardTitle>
-          <CardDescription>
-            Results from recent A/B tests
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center">
+          <div>
+            <CardTitle>A/B Testing Results</CardTitle>
+            <CardDescription>
+              Results from recent A/B tests
+            </CardDescription>
+          </div>
+          <ExportMenu chartId="ab-testing-chart" title="AB Testing Results" />
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
+          <div id="ab-testing-chart" className="space-y-6">
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="font-medium">Homepage Redesign</span>

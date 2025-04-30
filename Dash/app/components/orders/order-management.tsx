@@ -9,20 +9,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  RefreshCw, 
-  MoreHorizontal, 
-  Eye, 
-  Edit, 
-  Printer, 
+import {
+  Search,
+  Filter,
+  Download,
+  RefreshCw,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Printer,
   ArrowUpDown,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  FileDown
 } from "lucide-react"
 import { Order, OrderItem } from "@/types/dashboard"; // Import shared types
+import { exportToCsv } from "@/lib/export-utils"
 
 // Remove local Order interface definition
 
@@ -342,10 +344,64 @@ export function OrderManagement({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Button variant="outline" onClick={onExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => {
+                // Prepare data for export
+                let dataToExport;
+                let filename;
+                
+                if (selectedOrders.length > 0) {
+                  // Export only selected orders
+                  const selectedOrdersData = orders.filter(order => selectedOrders.includes(order.id));
+                  dataToExport = selectedOrdersData.map(order => ({
+                    id: order.id,
+                    orderNumber: order.orderNumber,
+                    createdAt: order.createdAt,
+                    status: order.status,
+                    total: order.total,
+                    customerName: order.customer.name,
+                    customerEmail: order.customer.email
+                  }));
+                  filename = 'selected-orders.csv';
+                } else {
+                  // No orders selected, export all filtered orders
+                  dataToExport = filteredOrders.map(order => ({
+                    id: order.id,
+                    orderNumber: order.orderNumber,
+                    createdAt: order.createdAt,
+                    status: order.status,
+                    total: order.total,
+                    customerName: order.customer.name,
+                    customerEmail: order.customer.email
+                  }));
+                  filename = 'all-orders.csv';
+                }
+                
+                // Export the data
+                exportToCsv(dataToExport, filename, {
+                  id: 'ID',
+                  orderNumber: 'Order Number',
+                  createdAt: 'Date',
+                  status: 'Status',
+                  total: 'Total',
+                  customerName: 'Customer Name',
+                  customerEmail: 'Customer Email'
+                });
+              }}>
+                <FileDown className="mr-2 h-4 w-4" />
+                {selectedOrders.length > 0
+                  ? `Export ${selectedOrders.length} Selected Orders`
+                  : "Export All Orders"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" onClick={onRefresh}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
@@ -496,7 +552,35 @@ export function OrderManagement({
             <div className="flex items-center gap-2 bg-muted p-4 rounded-md">
               <span className="text-sm font-medium">{selectedOrders.length} orders selected</span>
               <div className="flex-1"></div>
-              <Select onValueChange={(value) => onBulkAction && onBulkAction(value, selectedOrders)}>
+              <Select onValueChange={(value) => {
+                if (value === "export") {
+                  // Handle export action directly
+                  const selectedOrdersData = orders.filter(order => selectedOrders.includes(order.id));
+                  // Create a flattened version of the data for CSV export
+                  const flattenedData = selectedOrdersData.map(order => ({
+                    id: order.id,
+                    orderNumber: order.orderNumber,
+                    createdAt: order.createdAt,
+                    status: order.status,
+                    total: order.total,
+                    customerName: order.customer.name,
+                    customerEmail: order.customer.email
+                  }));
+                  
+                  exportToCsv(flattenedData, 'selected-orders.csv', {
+                    id: 'ID',
+                    orderNumber: 'Order Number',
+                    createdAt: 'Date',
+                    status: 'Status',
+                    total: 'Total',
+                    customerName: 'Customer Name',
+                    customerEmail: 'Customer Email'
+                  });
+                } else if (onBulkAction) {
+                  // Handle other actions via callback
+                  onBulkAction(value, selectedOrders);
+                }
+              }}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Bulk Actions" />
                 </SelectTrigger>
