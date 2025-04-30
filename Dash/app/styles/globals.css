@@ -32,7 +32,12 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
  
+    /* Border radius variables */
     --radius: 0.5rem;
+    --radius-none: 0;
+    --radius-small: 0.25rem;
+    --radius-medium: 0.5rem;
+    --radius-large: 1rem;
   }
  
   .dark {

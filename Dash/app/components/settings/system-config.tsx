@@ -42,8 +42,6 @@ interface SystemConfigProps {
     appearance: {
       theme: "light" | "dark" | "system"
       sidebarOrientation: "vertical" | "horizontal"
-      density: "compact" | "comfortable" | "spacious"
-      borderRadius: "none" | "small" | "medium" | "large"
       animations: boolean
     }
     businessInfo: {
@@ -316,70 +314,6 @@ export function SystemConfig({
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label>Density</Label>
-                <div className="grid grid-cols-3 gap-4">
-                  <Button
-                    variant={currentConfig.appearance.density === "compact" ? "default" : "outline"}
-                    className="flex flex-col items-center justify-center h-16 gap-1"
-                    onClick={() => handleAppearanceChange("density", "compact")}
-                  >
-                    <span>Compact</span>
-                  </Button>
-                  <Button
-                    variant={currentConfig.appearance.density === "comfortable" ? "default" : "outline"}
-                    className="flex flex-col items-center justify-center h-16 gap-1"
-                    onClick={() => handleAppearanceChange("density", "comfortable")}
-                  >
-                    <span>Comfortable</span>
-                  </Button>
-                  <Button
-                    variant={currentConfig.appearance.density === "spacious" ? "default" : "outline"}
-                    className="flex flex-col items-center justify-center h-16 gap-1"
-                    onClick={() => handleAppearanceChange("density", "spacious")}
-                  >
-                    <span>Spacious</span>
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Border Radius</Label>
-                <div className="grid grid-cols-4 gap-4">
-                  <Button
-                    variant={currentConfig.appearance.borderRadius === "none" ? "default" : "outline"}
-                    className="flex flex-col items-center justify-center h-16 gap-1"
-                    onClick={() => handleAppearanceChange("borderRadius", "none")}
-                  >
-                    <div className="h-6 w-6 border-2 border-current"></div>
-                    <span className="text-xs">None</span>
-                  </Button>
-                  <Button
-                    variant={currentConfig.appearance.borderRadius === "small" ? "default" : "outline"}
-                    className="flex flex-col items-center justify-center h-16 gap-1"
-                    onClick={() => handleAppearanceChange("borderRadius", "small")}
-                  >
-                    <div className="h-6 w-6 border-2 border-current rounded-sm"></div>
-                    <span className="text-xs">Small</span>
-                  </Button>
-                  <Button
-                    variant={currentConfig.appearance.borderRadius === "medium" ? "default" : "outline"}
-                    className="flex flex-col items-center justify-center h-16 gap-1"
-                    onClick={() => handleAppearanceChange("borderRadius", "medium")}
-                  >
-                    <div className="h-6 w-6 border-2 border-current rounded-md"></div>
-                    <span className="text-xs">Medium</span>
-                  </Button>
-                  <Button
-                    variant={currentConfig.appearance.borderRadius === "large" ? "default" : "outline"}
-                    className="flex flex-col items-center justify-center h-16 gap-1"
-                    onClick={() => handleAppearanceChange("borderRadius", "large")}
-                  >
-                    <div className="h-6 w-6 border-2 border-current rounded-lg"></div>
-                    <span className="text-xs">Large</span>
-                  </Button>
-                </div>
-              </div>
               
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
