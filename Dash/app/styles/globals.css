@@ -64,6 +64,99 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
   }
+
+  /* Catppuccin Theme - Mocha variant */
+  .catppuccin {
+    --background: 240 21% 15%;
+    --foreground: 226 64% 88%;
+
+    --card: 240 21% 15%;
+    --card-foreground: 226 64% 88%;
+
+    --popover: 240 21% 15%;
+    --popover-foreground: 226 64% 88%;
+
+    --primary: 183 74% 70%;
+    --primary-foreground: 240 21% 15%;
+
+    --secondary: 266 85% 58%;
+    --secondary-foreground: 226 64% 88%;
+
+    --muted: 240 21% 20%;
+    --muted-foreground: 226 64% 70%;
+
+    --accent: 316 72% 86%;
+    --accent-foreground: 240 21% 15%;
+
+    --destructive: 343 81% 75%;
+    --destructive-foreground: 240 21% 15%;
+
+    --border: 240 21% 25%;
+    --input: 240 21% 25%;
+    --ring: 183 74% 70%;
+  }
+
+  /* Gruvbox Theme - Dark variant */
+  .gruvbox {
+    --background: 50 8% 15%;
+    --foreground: 50 11% 87%;
+
+    --card: 50 8% 15%;
+    --card-foreground: 50 11% 87%;
+
+    --popover: 50 8% 15%;
+    --popover-foreground: 50 11% 87%;
+
+    --primary: 29 70% 44%;
+    --primary-foreground: 50 11% 87%;
+
+    --secondary: 42 87% 37%;
+    --secondary-foreground: 50 11% 87%;
+
+    --muted: 50 8% 20%;
+    --muted-foreground: 50 11% 70%;
+
+    --accent: 100 18% 41%;
+    --accent-foreground: 50 11% 87%;
+
+    --destructive: 0 63% 42%;
+    --destructive-foreground: 50 11% 87%;
+
+    --border: 50 8% 25%;
+    --input: 50 8% 25%;
+    --ring: 29 70% 44%;
+  }
+
+  /* Nord Theme */
+  .nord {
+    --background: 220 16% 22%;
+    --foreground: 218 27% 92%;
+
+    --card: 220 16% 22%;
+    --card-foreground: 218 27% 92%;
+
+    --popover: 220 16% 22%;
+    --popover-foreground: 218 27% 92%;
+
+    --primary: 193 43% 67%;
+    --primary-foreground: 220 16% 22%;
+
+    --secondary: 210 34% 63%;
+    --secondary-foreground: 218 27% 92%;
+
+    --muted: 220 16% 28%;
+    --muted-foreground: 218 27% 80%;
+
+    --accent: 179 25% 65%;
+    --accent-foreground: 220 16% 22%;
+
+    --destructive: 354 42% 56%;
+    --destructive-foreground: 218 27% 92%;
+
+    --border: 220 16% 28%;
+    --input: 220 16% 28%;
+    --ring: 193 43% 67%;
+  }
 }
  
 @layer base {
@@ -133,4 +226,39 @@
 
 .drop-zone.active {
   @apply border-primary bg-primary/5;
+}
+
+/* Layout styles */
+.layout-vertical {
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 70px;
+}
+
+.layout-horizontal {
+  --sidebar-height: 64px;
+}
+
+/* Theme preview styles */
+.catppuccin-preview {
+  background: hsl(240 21% 15%);
+  color: hsl(226 64% 88%);
+  border: 1px solid hsl(183 74% 70%);
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.gruvbox-preview {
+  background: hsl(50 8% 15%);
+  color: hsl(50 11% 87%);
+  border: 1px solid hsl(29 70% 44%);
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.nord-preview {
+  background: hsl(220 16% 22%);
+  color: hsl(218 27% 92%);
+  border: 1px solid hsl(193 43% 67%);
+  padding: 0.5rem;
+  border-radius: 0.25rem;
 }

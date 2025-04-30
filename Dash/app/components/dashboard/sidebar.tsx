@@ -199,15 +199,25 @@ export function Sidebar({ collapsed = false, orientation = 'vertical' }: Sidebar
     const observer = new MutationObserver(checkOrientation);
     observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     
-    return () => observer.disconnect();
+    // Listen for custom layout change events
+    const handleLayoutChange = (event: CustomEvent) => {
+      setCurrentOrientation(event.detail.orientation);
+    };
+    
+    window.addEventListener('layout-change', handleLayoutChange as EventListener);
+    
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('layout-change', handleLayoutChange as EventListener);
+    };
   }, []);
   
   if (currentOrientation === 'horizontal') {
     return (
-      <div 
+      <div
         data-sidebar
         data-orientation="horizontal"
-        className="w-full border-b bg-background z-20"
+        className="w-full border-b bg-background z-20 sticky top-0"
       >
         <div className="container mx-auto">
           <div className="flex items-center h-16">

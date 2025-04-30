@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { ThemeSelector } from "./theme-selector"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -122,14 +123,12 @@ export function SystemConfig({
     if (field === 'theme') {
       const root = window.document.documentElement;
       
-      // Remove previous theme
-      root.classList.remove('light', 'dark');
+      // Remove all theme classes
+      root.classList.remove('light', 'dark', 'catppuccin', 'gruvbox', 'nord');
       
       // Add new theme
-      if (value === 'dark') {
-        root.classList.add('dark');
-      } else if (value === 'light') {
-        root.classList.add('light');
+      if (['light', 'dark', 'catppuccin', 'gruvbox', 'nord'].includes(value)) {
+        root.classList.add(value);
       } else if (value === 'system') {
         // Check system preference
         const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -139,19 +138,19 @@ export function SystemConfig({
     
     // Apply sidebar orientation changes
     if (field === 'sidebarOrientation') {
-      const sidebar = document.querySelector('[data-sidebar]');
-      if (sidebar) {
-        sidebar.setAttribute('data-orientation', value);
-        
-        // Update layout classes
-        if (value === 'vertical') {
-          document.body.classList.remove('layout-horizontal');
-          document.body.classList.add('layout-vertical');
-        } else {
-          document.body.classList.remove('layout-vertical');
-          document.body.classList.add('layout-horizontal');
-        }
+      // Update layout classes on body
+      if (value === 'vertical') {
+        document.body.classList.remove('layout-horizontal');
+        document.body.classList.add('layout-vertical');
+      } else {
+        document.body.classList.remove('layout-vertical');
+        document.body.classList.add('layout-horizontal');
       }
+      
+      // Force a layout refresh by dispatching a custom event
+      window.dispatchEvent(new CustomEvent('layout-change', {
+        detail: { orientation: value }
+      }));
     }
   }
 
@@ -274,32 +273,10 @@ export function SystemConfig({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <Button
-                  variant={currentConfig.appearance.theme === "light" ? "default" : "outline"}
-                  className="flex flex-col items-center justify-center h-24 gap-2"
-                  onClick={() => handleAppearanceChange("theme", "light")}
-                >
-                  <Sun className="h-6 w-6" />
-                  <span>Light</span>
-                </Button>
-                <Button
-                  variant={currentConfig.appearance.theme === "dark" ? "default" : "outline"}
-                  className="flex flex-col items-center justify-center h-24 gap-2"
-                  onClick={() => handleAppearanceChange("theme", "dark")}
-                >
-                  <Moon className="h-6 w-6" />
-                  <span>Dark</span>
-                </Button>
-                <Button
-                  variant={currentConfig.appearance.theme === "system" ? "default" : "outline"}
-                  className="flex flex-col items-center justify-center h-24 gap-2"
-                  onClick={() => handleAppearanceChange("theme", "system")}
-                >
-                  <Monitor className="h-6 w-6" />
-                  <span>System</span>
-                </Button>
-              </div>
+              {/* Use the new ThemeSelector component */}
+              <ThemeSelector
+                onThemeChange={(theme) => handleAppearanceChange("theme", theme)}
+              />
             </CardContent>
           </Card>
           

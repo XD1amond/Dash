@@ -74,4 +74,15 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
+  safelist: [
+    // Add theme classes to safelist to ensure they're not purged
+    'light',
+    'dark',
+    'catppuccin',
+    'gruvbox',
+    'nord',
+    // Layout classes
+    'layout-vertical',
+    'layout-horizontal'
+  ]
 }

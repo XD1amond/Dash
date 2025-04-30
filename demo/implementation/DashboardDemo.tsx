@@ -11,7 +11,6 @@ import { SystemConfig } from "../../Dash/app/components/settings/system-config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../Dash/app/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../Dash/app/components/ui/tabs"
 import { Button } from "../../Dash/app/components/ui/button"
-// import { Download } from "lucide-react" // Removed unused import
 
 import {
   generateRevenueData,
