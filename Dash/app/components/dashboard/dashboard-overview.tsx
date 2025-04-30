@@ -92,7 +92,7 @@ export function DashboardOverview({
 
   // --- Layout State ---
   const [headerLayoutState, setHeaderLayoutState] = useState<LayoutSection[]>(() => [
-    { id: "header-stats", title: "Key Performance Indicators", widgets: statCardWidgets.map(w => w.id) }
+    { id: "header-stats", title: "Pinned", widgets: statCardWidgets.map(w => w.id) }
   ]);
   const [tabLayoutStates, setTabLayoutStates] = useState<Record<string, LayoutSection[]>>({
     overview: defaultOverviewLayout,
@@ -148,7 +148,7 @@ export function DashboardOverview({
     const currentLayout = instanceId === 'header' ? headerLayoutState : tabLayoutStates[instanceId];
     const currentWidgetsInSection = currentLayout.find(s => s.id === sectionId)?.widgets || [];
 
-    // For header (Key Performance Indicators), allow any small widget regardless of section
+    // For header (Pinned), allow any small widget regardless of section
     let filteredWidgets;
     if (instanceId === 'header') {
       filteredWidgets = Object.values(availableWidgetsMap)

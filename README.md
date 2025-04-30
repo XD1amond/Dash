@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/logo.png" alt="Dash Logo" width="200">
+</p>
+
 # Dash - E-commerce Dashboard
 
 A comprehensive E-commerce Dashboard component library with analytics, CMS, order management, CRM, product management, and system configuration, designed to be integrated into existing Next.js applications.

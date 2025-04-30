@@ -9,14 +9,14 @@ export const performanceWidgets = [
   {
     id: "performance-overview",
     name: "Performance Overview",
-    description: "Key performance indicators",
+    description: "Pinned",
     category: "Performance",
     component: (
       <Card className="col-span-4">
         <CardHeader>
           <CardTitle>Performance Overview</CardTitle>
           <CardDescription>
-            Key performance indicators
+            Pinned
           </CardDescription>
         </CardHeader>
         <CardContent>

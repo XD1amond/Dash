@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import logoImage from "../../assets/logo.png"
 import { DashboardOverview } from "../../Dash/app/components/dashboard/dashboard-overview"
 import { CMSDashboard } from "../../Dash/app/components/cms/cms-dashboard"
 import { OrderManagement } from "../../Dash/app/components/orders/order-management"
@@ -34,6 +35,9 @@ import {
 } from "../data/mock-data"
 
 export function DashboardDemo() {
+  // State for active tab
+  const [activeTab, setActiveTab] = useState("analytics")
+  
   // State for date range
   const [dateRange, setDateRange] = useState<{
     from: Date
@@ -76,28 +80,80 @@ export function DashboardDemo() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="border-b bg-background px-4 py-3">
-        <div className="container mx-auto">
-          <h1 className="text-xl font-bold">E-commerce Dashboard Demo</h1>
-          <p className="text-sm text-muted-foreground">
-            Demonstration of the dashboard components with mock data
-          </p>
+    <div className="flex min-h-screen">
+      {/* Left Sidebar */}
+      <div className="border-r bg-background flex flex-col" style={{ width: "250px" }}>
+        {/* Logo centered in sidebar */}
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-center">
+            <img src={logoImage.src} alt="Dashboard Logo" className="h-32" />
+          </div>
         </div>
-      </header>
+        
+        {/* Vertical Navigation */}
+        <nav className="p-4 flex-1">
+          <ul className="space-y-2">
+            <li>
+              <Button
+                variant={activeTab === "analytics" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setActiveTab("analytics")}
+              >
+                Analytics
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant={activeTab === "cms" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setActiveTab("cms")}
+              >
+                CMS
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant={activeTab === "orders" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setActiveTab("orders")}
+              >
+                Orders
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant={activeTab === "customers" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setActiveTab("customers")}
+              >
+                Customers
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant={activeTab === "products" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setActiveTab("products")}
+              >
+                Products
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant={activeTab === "settings" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setActiveTab("settings")}
+              >
+                Settings
+              </Button>
+            </li>
+          </ul>
+        </nav>
+      </div>
       
-      <main className="flex-1 container mx-auto p-4 md:p-6 space-y-8">
-        <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="w-full"> {/* Removed md:w-auto to make it always full width */}
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="cms">CMS</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="customers">Customers</TabsTrigger>
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="analytics" className="space-y-4">
+      {/* Main Content */}
+      <main className="flex-1 p-6 overflow-auto">
+        {activeTab === "analytics" && (
             <DashboardOverview
               stats={statCardData}
               revenueData={revenueData}
@@ -107,9 +163,9 @@ export function DashboardDemo() {
               onDateRangeChange={handleDateRangeChange}
               onExport={handleExport}
             />
-          </TabsContent>
+        )}
         
-          <TabsContent value="cms">
+        {activeTab === "cms" && (
             <CMSDashboard
               pages={generatePages()}
               templates={generateTemplates()}
@@ -120,9 +176,9 @@ export function DashboardDemo() {
               onSearch={(query) => console.log("Search:", query)}
               onFilter={(filter) => console.log("Filter:", filter)}
             />
-          </TabsContent>
-          
-          <TabsContent value="orders">
+        )}
+        
+        {activeTab === "orders" && (
             <OrderManagement
               orders={generateOrders(20)}
               onSearch={(query) => console.log("Search orders:", query)}
@@ -135,9 +191,9 @@ export function DashboardDemo() {
               onPrintOrder={(orderId) => console.log("Print order:", orderId)}
               onUpdateStatus={(orderId, status) => console.log("Update status:", orderId, status)}
             />
-          </TabsContent>
+        )}
         
-          <TabsContent value="customers">
+        {activeTab === "customers" && (
             <CustomerManagement
               customers={generateCustomers(20)}
               segments={generateCustomerSegments()}
@@ -153,9 +209,9 @@ export function DashboardDemo() {
               onEditSegment={(id) => console.log("Edit segment:", id)}
               onDeleteSegment={(id) => console.log("Delete segment:", id)}
             />
-          </TabsContent>
+        )}
         
-          <TabsContent value="products">
+        {activeTab === "products" && (
             <ProductManagement
               products={generateProducts(20)}
               categories={generateProductCategories()}
@@ -171,9 +227,9 @@ export function DashboardDemo() {
               onDeleteCategory={(id) => console.log("Delete category:", id)}
               onBulkAction={(action, ids) => console.log("Bulk action:", action, ids)}
             />
-          </TabsContent>
-          
-          <TabsContent value="settings">
+        )}
+        
+        {activeTab === "settings" && (
             <SystemConfig
               config={generateSystemConfig()}
               roles={[
@@ -197,8 +253,7 @@ export function DashboardDemo() {
               onEditRole={(id) => console.log("Edit role:", id)}
               onDeleteRole={(id) => console.log("Delete role:", id)}
             />
-          </TabsContent>
-        </Tabs>
+        )}
       </main>
     </div>
   )
