@@ -4,7 +4,7 @@
  * Utility functions for exporting data in various formats
  */
 
-// Function to export chart as PNG
+// Function to export chart as PNG or JPG
 export const exportChartAsPng = (chartId: string, filename: string = 'chart.png') => {
   const chartElement = document.getElementById(chartId);
   if (!chartElement) {
@@ -12,17 +12,58 @@ export const exportChartAsPng = (chartId: string, filename: string = 'chart.png'
     return;
   }
 
+  // Determine if we're in dark mode
+  const isDarkTheme = document.documentElement.classList.contains('dark');
+  
+  // Save original styles
+  const originalStyles = {
+    background: chartElement.style.background,
+    color: chartElement.style.color,
+    padding: chartElement.style.padding,
+    borderRadius: chartElement.style.borderRadius,
+    boxShadow: chartElement.style.boxShadow
+  };
+  
+  // Apply theme-appropriate styles for export
+  chartElement.style.background = isDarkTheme ? 'var(--background)' : 'white';
+  chartElement.style.color = isDarkTheme ? 'white' : 'black';
+  chartElement.style.padding = '20px';
+  chartElement.style.borderRadius = '8px';
+  chartElement.style.boxShadow = 'none';
+
   // Use html2canvas to convert the chart to an image
   import('html2canvas').then((html2canvas) => {
-    html2canvas.default(chartElement).then((canvas: HTMLCanvasElement) => {
+    html2canvas.default(chartElement, {
+      backgroundColor: isDarkTheme ? '#1a1a1a' : '#ffffff',
+      scale: 2, // Higher resolution
+      logging: false,
+      useCORS: true
+    }).then((canvas: HTMLCanvasElement) => {
       // Create a download link
       const link = document.createElement('a');
       link.download = filename;
-      link.href = canvas.toDataURL('image/png');
+      
+      // Determine image format from filename
+      const format = filename.toLowerCase().endsWith('.jpg') ? 'image/jpeg' : 'image/png';
+      link.href = canvas.toDataURL(format, 0.95);
       link.click();
+      
+      // Restore original styles
+      chartElement.style.background = originalStyles.background;
+      chartElement.style.color = originalStyles.color;
+      chartElement.style.padding = originalStyles.padding;
+      chartElement.style.borderRadius = originalStyles.borderRadius;
+      chartElement.style.boxShadow = originalStyles.boxShadow;
     });
   }).catch(err => {
     console.error('Failed to load html2canvas', err);
+    
+    // Restore original styles even if export fails
+    chartElement.style.background = originalStyles.background;
+    chartElement.style.color = originalStyles.color;
+    chartElement.style.padding = originalStyles.padding;
+    chartElement.style.borderRadius = originalStyles.borderRadius;
+    chartElement.style.boxShadow = originalStyles.boxShadow;
   });
 };
 
@@ -34,6 +75,9 @@ export const getChartEmbedCode = (chartId: string): string => {
     return '';
   }
 
+  // Determine if we're in dark mode
+  const isDarkTheme = document.documentElement.classList.contains('dark');
+
   // Clone the chart element to avoid modifying the original
   const clonedChart = chartElement.cloneNode(true) as HTMLElement;
   
@@ -43,9 +87,30 @@ export const getChartEmbedCode = (chartId: string): string => {
   // Apply essential styles to the cloned element
   clonedChart.style.width = styles.width;
   clonedChart.style.height = styles.height;
+  clonedChart.style.background = isDarkTheme ? 'var(--background, #1a1a1a)' : 'white';
+  clonedChart.style.color = isDarkTheme ? 'white' : 'black';
+  clonedChart.style.padding = '20px';
+  clonedChart.style.borderRadius = '8px';
+  clonedChart.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+  
+  // Create a wrapper with theme class
+  const wrapper = document.createElement('div');
+  wrapper.className = isDarkTheme ? 'dark' : 'light';
+  wrapper.style.width = '100%';
+  wrapper.style.maxWidth = '800px';
+  wrapper.style.margin = '0 auto';
+  wrapper.appendChild(clonedChart);
+  
+  // Add some basic CSS to ensure proper rendering
+  const style = document.createElement('style');
+  style.textContent = `
+    .dark { color-scheme: dark; }
+    .light { color-scheme: light; }
+  `;
+  wrapper.appendChild(style);
   
   // Return the HTML as a string
-  return clonedChart.outerHTML;
+  return wrapper.outerHTML;
 };
 
 // Function to export data as CSV

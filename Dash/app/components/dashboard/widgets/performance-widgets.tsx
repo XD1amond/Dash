@@ -1,6 +1,13 @@
 "use client"
 
+import React from 'react'
+import { WidgetWrapper } from "./widget-components"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  performanceOverviewData,
+  marketingRoiData,
+  productPerformanceData
+} from "../../../../../demo/data/widget-data"
 
 // Define the widget size type
 type WidgetSize = "small" | "medium" | "large" | "full";
@@ -9,41 +16,28 @@ export const performanceWidgets = [
   {
     id: "performance-overview",
     name: "Performance Overview",
-    description: "Pinned",
+    description: "Key performance metrics",
     category: "Performance",
     component: (
-      <Card className="col-span-4">
-        <CardHeader>
-          <CardTitle>Performance Overview</CardTitle>
-          <CardDescription>
-            Pinned
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Avg. Order Value</div>
-              <div className="text-2xl font-bold">$86.42</div>
-              <div className="text-xs text-green-500">+4.3% vs last month</div>
+      <WidgetWrapper
+        title="Performance Overview"
+        description="Key performance metrics"
+        chartId="performance-overview-chart"
+        data={performanceOverviewData}
+        relatedWidgets={[]} // Will be updated after initialization
+      >
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {performanceOverviewData.map((item, index) => (
+            <div key={index} className="space-y-1">
+              <div className="text-sm text-muted-foreground">{item.metric}</div>
+              <div className="text-2xl font-bold">{item.value}</div>
+              <div className={`text-xs ${item.direction === 'up' ? 'text-green-500' : 'text-red-500'}`}>
+                {item.change} vs last month
+              </div>
             </div>
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Conversion Rate</div>
-              <div className="text-2xl font-bold">3.2%</div>
-              <div className="text-xs text-green-500">+0.4% vs last month</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Cart Abandonment</div>
-              <div className="text-2xl font-bold">68.7%</div>
-              <div className="text-xs text-red-500">+1.2% vs last month</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-sm text-muted-foreground">Return Rate</div>
-              <div className="text-2xl font-bold">4.8%</div>
-              <div className="text-xs text-green-500">-0.3% vs last month</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      </WidgetWrapper>
     ),
     defaultSize: "large" as WidgetSize
   },
@@ -53,63 +47,32 @@ export const performanceWidgets = [
     description: "Return on investment by channel",
     category: "Performance",
     component: (
-      <Card className="col-span-3">
-        <CardHeader>
-          <CardTitle>Marketing ROI</CardTitle>
-          <CardDescription>
-            Return on investment by channel
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
+      <WidgetWrapper
+        title="Marketing ROI"
+        description="Return on investment by channel"
+        chartId="marketing-roi-chart"
+        data={marketingRoiData}
+        relatedWidgets={[]} // Will be updated after initialization
+      >
+        <div className="space-y-4">
+          {marketingRoiData.map((item, index) => (
+            <div key={index} className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="font-medium">Paid Search</span>
-                <span className="font-medium text-green-500">342%</span>
+                <span className="font-medium">{item.channel}</span>
+                <span className={`font-medium ${item.roi.startsWith('4') ? 'text-green-500' : item.roi.startsWith('1') ? 'text-amber-500' : 'text-green-500'}`}>
+                  {item.roi}
+                </span>
               </div>
               <div className="h-2 bg-muted rounded-full">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: "85%" }}></div>
+                <div
+                  className={`h-full ${item.roi.startsWith('4') ? 'bg-green-500' : item.roi.startsWith('1') ? 'bg-amber-500' : 'bg-green-500'} rounded-full`}
+                  style={{ width: `${item.percentage}%` }}
+                ></div>
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">Social Media</span>
-                <span className="font-medium text-green-500">285%</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: "72%" }}></div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">Email Marketing</span>
-                <span className="font-medium text-green-500">420%</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: "92%" }}></div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">Affiliate</span>
-                <span className="font-medium text-green-500">178%</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: "45%" }}></div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">Display Ads</span>
-                <span className="font-medium text-amber-500">124%</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full">
-                <div className="h-full bg-amber-500 rounded-full" style={{ width: "32%" }}></div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      </WidgetWrapper>
     ),
     defaultSize: "medium" as WidgetSize
   },
@@ -119,70 +82,57 @@ export const performanceWidgets = [
     description: "Performance metrics by product category",
     category: "Performance",
     component: (
-      <Card className="col-span-3">
-        <CardHeader>
-          <CardTitle>Product Performance</CardTitle>
-          <CardDescription>
-            Performance metrics by product category
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left font-medium p-2">Category</th>
-                  <th className="text-right font-medium p-2">Revenue</th>
-                  <th className="text-right font-medium p-2">Units</th>
-                  <th className="text-right font-medium p-2">Profit</th>
-                  <th className="text-right font-medium p-2">Margin</th>
+      <WidgetWrapper
+        title="Product Performance"
+        description="Performance metrics by product category"
+        chartId="product-performance-chart"
+        data={productPerformanceData}
+        relatedWidgets={[]} // Will be updated after initialization
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left font-medium p-2">Category</th>
+                <th className="text-right font-medium p-2">Revenue</th>
+                <th className="text-right font-medium p-2">Units</th>
+                <th className="text-right font-medium p-2">Profit</th>
+                <th className="text-right font-medium p-2">Margin</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productPerformanceData.map((item, index) => (
+                <tr key={index} className={index < productPerformanceData.length - 1 ? "border-b" : ""}>
+                  <td className="p-2 font-medium">{item.category}</td>
+                  <td className="p-2 text-right">{item.revenue}</td>
+                  <td className="p-2 text-right">{item.units}</td>
+                  <td className="p-2 text-right">{item.profit}</td>
+                  <td className="p-2 text-right text-green-500">{item.margin}</td>
                 </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="p-2 font-medium">Electronics</td>
-                  <td className="p-2 text-right">$245,678</td>
-                  <td className="p-2 text-right">1,245</td>
-                  <td className="p-2 text-right">$78,617</td>
-                  <td className="p-2 text-right text-green-500">32%</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="p-2 font-medium">Clothing</td>
-                  <td className="p-2 text-right">$187,432</td>
-                  <td className="p-2 text-right">3,876</td>
-                  <td className="p-2 text-right">$89,967</td>
-                  <td className="p-2 text-right text-green-500">48%</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="p-2 font-medium">Home & Kitchen</td>
-                  <td className="p-2 text-right">$143,765</td>
-                  <td className="p-2 text-right">2,154</td>
-                  <td className="p-2 text-right">$38,816</td>
-                  <td className="p-2 text-right text-green-500">27%</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="p-2 font-medium">Beauty</td>
-                  <td className="p-2 text-right">$98,432</td>
-                  <td className="p-2 text-right">4,321</td>
-                  <td className="p-2 text-right">$42,326</td>
-                  <td className="p-2 text-right text-green-500">43%</td>
-                </tr>
-                <tr>
-                  <td className="p-2 font-medium">Sports</td>
-                  <td className="p-2 text-right">$76,543</td>
-                  <td className="p-2 text-right">1,876</td>
-                  <td className="p-2 text-right">$24,493</td>
-                  <td className="p-2 text-right text-green-500">32%</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </WidgetWrapper>
     ),
     defaultSize: "medium" as WidgetSize
   }
 ];
+
+// Now that performanceWidgets is defined, we can create the getRelatedWidgets function
+const getRelatedWidgets = (widgetId: string) => {
+  const otherWidgets = performanceWidgets.filter(w => w.id !== widgetId);
+  return otherWidgets.slice(0, 2); // Return up to 2 related widgets
+};
+
+// Update the widget components with the correct related widgets
+performanceWidgets.forEach(widget => {
+  if (widget.component.props.relatedWidgets && Array.isArray(widget.component.props.relatedWidgets)) {
+    widget.component = React.cloneElement(widget.component, {
+      relatedWidgets: getRelatedWidgets(widget.id)
+    });
+  }
+});
 
 export const defaultPerformanceLayout = [
   {
