@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import logoImage from "../../assets/logo.png"
 import { DashboardOverview } from "../../Dash/app/components/dashboard/dashboard-overview"
 import { CMSDashboard } from "../../Dash/app/components/cms/cms-dashboard"
 import { OrderManagement } from "../../Dash/app/components/orders/order-management"
@@ -11,9 +10,18 @@ import { SystemConfig } from "../../Dash/app/components/settings/system-config"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../Dash/app/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../Dash/app/components/ui/tabs"
 import { Button } from "../../Dash/app/components/ui/button"
-
 // Import the data services
 import { createMockServices } from "../../Dash/config/data"
+
+// Import analytics data generators
+import {
+  generateRevenueData,
+  generateSalesData,
+  generateVisitorsData,
+  generateConversionData,
+  generateStatCardData,
+  generateAllAnalyticsData
+} from "../data/analytics-data"
 
 // Import legacy mock data generators for components not yet updated
 import {
@@ -41,8 +49,130 @@ export function DashboardDemo() {
     to: new Date(),
   })
 
-  // Create data services
-  const [dataServices] = useState(() => createMockServices(500)); // 500ms delay for mock data
+  // Create data services with mock data
+  const [dataServices] = useState(() => {
+    // Create mock services with a 500ms delay
+    const services = createMockServices(500);
+    
+    // Instead of replacing the entire analytics service, we'll monkey-patch
+    // just the methods we want to override while preserving the original object
+    
+    // Store original methods
+    const originalFetchRevenueData = services.analytics.fetchRevenueData;
+    const originalFetchSalesByCategory = services.analytics.fetchSalesByCategory;
+    const originalFetchVisitorsBySource = services.analytics.fetchVisitorsBySource;
+    const originalFetchConversionData = services.analytics.fetchConversionData;
+    const originalFetchStatCardData = services.analytics.fetchStatCardData;
+    
+    // Override fetchRevenueData to return our custom mock data
+    services.analytics.fetchRevenueData = async (from: Date, to: Date, interval: 'day' | 'week' | 'month' = 'month', page = 1, pageSize = 20) => {
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+      
+      // Use the generator function from analytics-data.ts
+      const revenueData = generateRevenueData(12);
+      
+      // Map to the expected format
+      const data = revenueData.map(item => ({
+        date: `2024-${item.name}`, // Format as expected by the dashboard
+        revenue: item.revenue
+      }));
+      
+      return {
+        data,
+        pagination: {
+          page,
+          pageSize,
+          totalItems: data.length,
+          totalPages: Math.ceil(data.length / pageSize),
+          total: data.length,
+          hasNextPage: page < Math.ceil(data.length / pageSize),
+          hasPreviousPage: page > 1
+        }
+      };
+    };
+    
+    // Override fetchSalesByCategory to return our custom mock data
+    services.analytics.fetchSalesByCategory = async (from: Date, to: Date, page = 1, pageSize = 20) => {
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+      
+      // Use the generator function from analytics-data.ts
+      const salesData = generateSalesData();
+      
+      return {
+        data: salesData,
+        pagination: {
+          page,
+          pageSize,
+          totalItems: salesData.length,
+          totalPages: Math.ceil(salesData.length / pageSize),
+          total: salesData.length,
+          hasNextPage: page < Math.ceil(salesData.length / pageSize),
+          hasPreviousPage: page > 1
+        }
+      };
+    };
+    
+    // Override fetchVisitorsBySource to return our custom mock data
+    services.analytics.fetchVisitorsBySource = async (from: Date, to: Date, page = 1, pageSize = 20) => {
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+      
+      // Use the generator function from analytics-data.ts
+      const visitorsData = generateVisitorsData();
+      
+      return {
+        data: visitorsData,
+        pagination: {
+          page,
+          pageSize,
+          totalItems: visitorsData.length,
+          totalPages: Math.ceil(visitorsData.length / pageSize),
+          total: visitorsData.length,
+          hasNextPage: page < Math.ceil(visitorsData.length / pageSize),
+          hasPreviousPage: page > 1
+        }
+      };
+    };
+    
+    // Override fetchConversionData to return our custom mock data
+    services.analytics.fetchConversionData = async (from: Date, to: Date, interval: 'day' | 'week' | 'month' = 'month', page = 1, pageSize = 20) => {
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+      
+      // Use the generator function from analytics-data.ts
+      const conversionData = generateConversionData(12);
+      
+      // Map to the expected format
+      const data = conversionData.map(item => ({
+        date: `2024-${item.name}`, // Format as expected by the dashboard
+        conversion: item.conversion
+      }));
+      
+      return {
+        data,
+        pagination: {
+          page,
+          pageSize,
+          totalItems: data.length,
+          totalPages: Math.ceil(data.length / pageSize),
+          total: data.length,
+          hasNextPage: page < Math.ceil(data.length / pageSize),
+          hasPreviousPage: page > 1
+        }
+      };
+    };
+    
+    // Override fetchStatCardData to return our custom mock data
+    services.analytics.fetchStatCardData = async () => {
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+      
+      // Use the generator function from analytics-data.ts
+      return generateStatCardData();
+    };
+    
+    // Note: We're only using the analytics service since it's the only one we know exists
+    // The other tabs will use the legacy mock data generators
+    
+    return services;
+  });
 
   // State for analytics data
   const [revenueData, setRevenueData] = useState<any[]>([])
@@ -102,7 +232,7 @@ export function DashboardDemo() {
         {/* Logo centered in sidebar */}
         <div className="p-4 border-b">
           <div className="flex items-center justify-center">
-            <img src={logoImage.src} alt="Dashboard Logo" className="h-32" />
+            <img src="../../assets/logo.png" alt="Dashboard Logo" className="h-32" />
           </div>
         </div>
         
