@@ -12,14 +12,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../Dash/app/components/ui/tabs"
 import { Button } from "../../Dash/app/components/ui/button"
 
-import {
-  generateRevenueData,
-  generateSalesData,
-  generateVisitorsData,
-  generateConversionData,
-  generateStatCardData
-} from "../data/analytics-data"
+// Import the data services
+import { createMockServices } from "../../Dash/config/data"
 
+// Import legacy mock data generators for components not yet updated
 import {
   generateOrders,
   generateCustomers,
@@ -29,8 +25,7 @@ import {
   generatePages,
   generateTemplates,
   generateMediaItems,
-  generateSystemConfig,
-  generateAllMockData
+  generateSystemConfig
 } from "../data/mock-data"
 
 export function DashboardDemo() {
@@ -46,25 +41,47 @@ export function DashboardDemo() {
     to: new Date(),
   })
 
+  // Create data services
+  const [dataServices] = useState(() => createMockServices(500)); // 500ms delay for mock data
+
   // State for analytics data
-  const [revenueData, setRevenueData] = useState(generateRevenueData())
-  const [salesData, setSalesData] = useState(generateSalesData())
-  const [visitorsData, setVisitorsData] = useState(generateVisitorsData())
-  const [conversionData, setConversionData] = useState(generateConversionData())
-  const [statCardData, setStatCardData] = useState(generateStatCardData())
+  const [revenueData, setRevenueData] = useState<any[]>([])
+  const [salesData, setSalesData] = useState<any[]>([])
+  const [visitorsData, setVisitorsData] = useState<any[]>([])
+  const [conversionData, setConversionData] = useState<any[]>([])
+  const [statCardData, setStatCardData] = useState<any[]>([])
 
   // State for other data
   const [orders, setOrders] = useState(generateOrders(10))
   const [customers, setCustomers] = useState(generateCustomers(10))
   const [products, setProducts] = useState(generateProducts(10))
 
-  // Regenerate data when date range changes
+  // Fetch data when component mounts or date range changes
   useEffect(() => {
-    // In a real implementation, this would fetch data from an API
-    // based on the selected date range
-    setRevenueData(generateRevenueData())
-    setConversionData(generateConversionData())
-  }, [dateRange])
+    const fetchData = async () => {
+      try {
+        // Fetch all data in parallel
+        const [revenue, sales, visitors, conversion, stats] = await Promise.all([
+          dataServices.analytics.fetchRevenueData(dateRange.from, dateRange.to, 'month'),
+          dataServices.analytics.fetchSalesByCategory(dateRange.from, dateRange.to),
+          dataServices.analytics.fetchVisitorsBySource(dateRange.from, dateRange.to),
+          dataServices.analytics.fetchConversionData(dateRange.from, dateRange.to, 'month'),
+          dataServices.analytics.fetchStatCardData()
+        ]);
+        
+        // Update state with fetched data
+        setRevenueData(revenue.data);
+        setSalesData(sales.data);
+        setVisitorsData(visitors.data);
+        setConversionData(conversion.data);
+        setStatCardData(stats);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
+    
+    fetchData();
+  }, [dateRange, dataServices.analytics]);
 
   // Handle date range change
   const handleDateRangeChange = (range: { from: Date; to: Date }) => {

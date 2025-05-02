@@ -1,33 +1,118 @@
 "use client"
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { WidgetWrapper } from "./widget-components"
 import {
-  salesFunnelData,
-  cohortAnalysisData,
-  abTestingData
-} from "../../../../../demo/data/widget-data"
+  SalesFunnelDataPoint,
+  CohortAnalysisDataPoint,
+  ABTestingResult
+} from '@/config/data/types';
+import { RestAdapter } from '@/config/data/adapters/rest.adapter'
+
+// Create a REST adapter for API calls
+const restAdapter = new RestAdapter({
+  baseUrl: '/api',
+  debug: process.env.NODE_ENV === 'development'
+});
+
+// Function to fetch sales funnel data
+const fetchSalesFunnel = async (): Promise<SalesFunnelDataPoint[]> => {
+  try {
+    const response = await restAdapter.fetchData<{data: SalesFunnelDataPoint[]}>('analytics/sales-funnel');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching sales funnel data:', error);
+    return [];
+  }
+};
+
+// Function to fetch cohort analysis data
+const fetchCohortAnalysis = async (): Promise<CohortAnalysisDataPoint[]> => {
+  try {
+    const response = await restAdapter.fetchData<{data: CohortAnalysisDataPoint[]}>('analytics/cohort-analysis');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching cohort analysis data:', error);
+    return [];
+  }
+};
+
+// Function to fetch A/B testing data
+const fetchABTesting = async (): Promise<ABTestingResult[]> => {
+  try {
+    const response = await restAdapter.fetchData<{data: ABTestingResult[]}>('analytics/ab-testing');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching A/B testing data:', error);
+    return [];
+  }
+};
 
 // Define the widget size type
 type WidgetSize = "small" | "medium" | "large" | "full";
 
-// Define the analytics widgets first
-export const analyticsWidgets = [
-  {
-    id: "sales-funnel",
-    name: "Sales Funnel",
-    description: "Conversion funnel from visit to purchase",
-    category: "Analytics",
-    component: (
-      <WidgetWrapper
-        title="Sales Funnel"
-        description="Conversion funnel from visit to purchase"
-        chartId="sales-funnel-chart"
-        data={salesFunnelData}
-        relatedWidgets={[]} // Will be updated after initialization
-      >
+// Define props interfaces for each widget component
+interface SalesFunnelWidgetProps {
+  data: SalesFunnelDataPoint[];
+}
+
+interface CohortAnalysisWidgetProps {
+  data: CohortAnalysisDataPoint[];
+}
+
+interface ABTestingWidgetProps {
+  data: ABTestingResult[];
+}
+
+// Create functional components for each widget type
+const SalesFunnelWidget: React.FC<SalesFunnelWidgetProps> = ({ data = [] }) => {
+  const [funnelData, setFunnelData] = useState<SalesFunnelDataPoint[]>(data);
+  const [loading, setLoading] = useState<boolean>(data.length === 0);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (data.length === 0) {
+        setLoading(true);
+        try {
+          const fetchedData = await fetchSalesFunnel();
+          setFunnelData(fetchedData);
+          setError(null);
+        } catch (err) {
+          setError('Failed to load sales funnel data');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+  }, [data]);
+
+  return (
+    <WidgetWrapper
+      title="Sales Funnel"
+      description="Conversion funnel from visit to purchase"
+      chartId="sales-funnel-chart"
+      data={funnelData}
+      relatedWidgets={getRelatedWidgets("sales-funnel")}
+    >
+      {loading ? (
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+          Loading sales funnel data...
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center h-[200px] text-red-500">
+          {error}
+        </div>
+      ) : funnelData.length === 0 ? (
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+          No sales funnel data available
+        </div>
+      ) : (
         <div className="space-y-8 pt-4">
-          {salesFunnelData.map((item, index) => (
+          {funnelData.map((item, index) => (
             <div key={index} className="relative">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-medium">{item.stage}</span>
@@ -42,23 +127,57 @@ export const analyticsWidgets = [
             </div>
           ))}
         </div>
-      </WidgetWrapper>
-    ),
-    defaultSize: "medium" as WidgetSize
-  },
-  {
-    id: "cohort-analysis",
-    name: "Cohort Analysis",
-    description: "Customer retention by cohort",
-    category: "Analytics",
-    component: (
-      <WidgetWrapper
-        title="Cohort Analysis"
-        description="Customer retention by cohort"
-        chartId="cohort-analysis-chart"
-        data={cohortAnalysisData}
-        relatedWidgets={[]} // Will be updated after initialization
-      >
+      )}
+    </WidgetWrapper>
+  );
+};
+
+const CohortAnalysisWidget: React.FC<CohortAnalysisWidgetProps> = ({ data = [] }) => {
+  const [cohortData, setCohortData] = useState<CohortAnalysisDataPoint[]>(data);
+  const [loading, setLoading] = useState<boolean>(data.length === 0);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (data.length === 0) {
+        setLoading(true);
+        try {
+          const fetchedData = await fetchCohortAnalysis();
+          setCohortData(fetchedData);
+          setError(null);
+        } catch (err) {
+          setError('Failed to load cohort analysis data');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+  }, [data]);
+
+  return (
+    <WidgetWrapper
+      title="Cohort Analysis"
+      description="Customer retention by cohort"
+      chartId="cohort-analysis-chart"
+      data={cohortData}
+      relatedWidgets={getRelatedWidgets("cohort-analysis")}
+    >
+      {loading ? (
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+          Loading cohort analysis data...
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center h-[200px] text-red-500">
+          {error}
+        </div>
+      ) : cohortData.length === 0 ? (
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+          No cohort analysis data available
+        </div>
+      ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -73,7 +192,7 @@ export const analyticsWidgets = [
               </tr>
             </thead>
             <tbody>
-              {cohortAnalysisData.map((row, index) => (
+              {cohortData.map((row, index) => (
                 <tr key={index}>
                   <td className="p-2 font-medium">{row.cohort}</td>
                   <td className="p-2 text-center bg-green-100 dark:bg-green-900/30">{row['Month 0']}</td>
@@ -87,8 +206,170 @@ export const analyticsWidgets = [
             </tbody>
           </table>
         </div>
-      </WidgetWrapper>
-    ),
+      )}
+    </WidgetWrapper>
+  );
+};
+
+const ABTestingWidget: React.FC<ABTestingWidgetProps> = ({ data = [] }) => {
+  const [testingData, setTestingData] = useState<ABTestingResult[]>(data);
+  const [loading, setLoading] = useState<boolean>(data.length === 0);
+  const [error, setError] = useState<string | null>(null);
+  const [groupedTests, setGroupedTests] = useState<Record<string, ABTestingResult[]>>({});
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (data.length === 0) {
+        setLoading(true);
+        try {
+          const fetchedData = await fetchABTesting();
+          setTestingData(fetchedData);
+          
+          // Group tests by test name
+          const grouped: Record<string, ABTestingResult[]> = {};
+          fetchedData.forEach(item => {
+            if (!grouped[item.test]) {
+              grouped[item.test] = [];
+            }
+            grouped[item.test].push(item);
+          });
+          
+          setGroupedTests(grouped);
+          setError(null);
+        } catch (err) {
+          setError('Failed to load A/B testing data');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // Group the provided data
+        const grouped: Record<string, ABTestingResult[]> = {};
+        data.forEach(item => {
+          if (!grouped[item.test]) {
+            grouped[item.test] = [];
+          }
+          grouped[item.test].push(item);
+        });
+        setGroupedTests(grouped);
+      }
+    };
+
+    loadData();
+  }, [data]);
+
+  // Calculate the change between control and test variants
+  const calculateChange = (testGroup: ABTestingResult[]): { change: string, isPositive: boolean, winner: boolean } => {
+    const control = testGroup.find(item => item.variant.includes('Control'));
+    const test = testGroup.find(item => item.variant.includes('Test'));
+    
+    if (!control || !test) {
+      return { change: '0%', isPositive: false, winner: false };
+    }
+    
+    // Extract numeric values from the value strings
+    const controlValue = parseFloat(control.value.replace('%', ''));
+    const testValue = parseFloat(test.value.replace('%', ''));
+    
+    const diff = testValue - controlValue;
+    const percentChange = (diff / controlValue) * 100;
+    const isPositive = percentChange > 0;
+    
+    // Determine if the test is a winner (significant positive change)
+    const winner = isPositive && Math.abs(percentChange) > 5;
+    
+    return {
+      change: `${isPositive ? '+' : ''}${percentChange.toFixed(1)}%`,
+      isPositive,
+      winner
+    };
+  };
+
+  return (
+    <WidgetWrapper
+      title="A/B Testing Results"
+      description="Results from recent A/B tests"
+      chartId="ab-testing-chart"
+      data={testingData}
+      relatedWidgets={getRelatedWidgets("ab-testing")}
+    >
+      {loading ? (
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+          Loading A/B testing data...
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center h-[200px] text-red-500">
+          {error}
+        </div>
+      ) : Object.keys(groupedTests).length === 0 ? (
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+          No A/B testing data available
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {Object.entries(groupedTests).map(([testName, testGroup], index) => {
+            const { change, isPositive, winner } = calculateChange(testGroup);
+            const control = testGroup.find(item => item.variant.includes('Control'));
+            const test = testGroup.find(item => item.variant.includes('Test'));
+            
+            return (
+              <div key={index} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">{testName}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-sm ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+                      {change} {control?.metric}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      winner
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        : isPositive
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                    }`}>
+                      {winner ? 'Winner' : isPositive ? 'Promising' : 'Inconclusive'}
+                    </span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {control && (
+                    <div className="space-y-1">
+                      <div className="text-sm text-muted-foreground">{control.variant}</div>
+                      <div className="text-sm">{control.value} {control.metric}</div>
+                    </div>
+                  )}
+                  {test && (
+                    <div className="space-y-1">
+                      <div className="text-sm text-muted-foreground">{test.variant}</div>
+                      <div className="text-sm">{test.value} {test.metric}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </WidgetWrapper>
+  );
+};
+
+// Define the analytics widgets with default empty data
+export const analyticsWidgets = [
+  {
+    id: "sales-funnel",
+    name: "Sales Funnel",
+    description: "Conversion funnel from visit to purchase",
+    category: "Analytics",
+    component: <SalesFunnelWidget data={[]} />,
+    defaultSize: "medium" as WidgetSize
+  },
+  {
+    id: "cohort-analysis",
+    name: "Cohort Analysis",
+    description: "Customer retention by cohort",
+    category: "Analytics",
+    component: <CohortAnalysisWidget data={[]} />,
     defaultSize: "full" as WidgetSize
   },
   {
@@ -96,80 +377,7 @@ export const analyticsWidgets = [
     name: "A/B Testing Results",
     description: "Results from recent A/B tests",
     category: "Analytics",
-    component: (
-      <WidgetWrapper
-        title="A/B Testing Results"
-        description="Results from recent A/B tests"
-        chartId="ab-testing-chart"
-        data={abTestingData}
-        relatedWidgets={[]} // Will be updated after initialization
-      >
-        <div className="space-y-6">
-          {/* Homepage Redesign */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Homepage Redesign</span>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-green-500">+12.4% Conversion</span>
-                <span className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-2 py-1 rounded-full">Winner</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Variant A (Control)</div>
-                <div className="text-sm">2.8% Conversion</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Variant B (Test)</div>
-                <div className="text-sm">3.15% Conversion</div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Checkout Flow */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Checkout Flow</span>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-green-500">+8.7% Completion</span>
-                <span className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-2 py-1 rounded-full">Winner</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Variant A (Control)</div>
-                <div className="text-sm">62.4% Completion</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Variant B (Test)</div>
-                <div className="text-sm">67.8% Completion</div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Product Page CTA */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Product Page CTA</span>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-red-500">-2.1% Clicks</span>
-                <span className="text-xs bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 px-2 py-1 rounded-full">Inconclusive</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Variant A (Control)</div>
-                <div className="text-sm">14.2% Click Rate</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-sm text-muted-foreground">Variant B (Test)</div>
-                <div className="text-sm">13.9% Click Rate</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </WidgetWrapper>
-    ),
+    component: <ABTestingWidget data={[]} />,
     defaultSize: "medium" as WidgetSize
   }
 ];
@@ -180,14 +388,7 @@ const getRelatedWidgets = (widgetId: string) => {
   return otherWidgets.slice(0, 2); // Return up to 2 related widgets
 };
 
-// Update the widget components with the correct related widgets
-analyticsWidgets.forEach(widget => {
-  if (widget.component.props.relatedWidgets && Array.isArray(widget.component.props.relatedWidgets)) {
-    widget.component = React.cloneElement(widget.component, {
-      relatedWidgets: getRelatedWidgets(widget.id)
-    });
-  }
-});
+// No need to update widget components here as relatedWidgets are already set in each component
 
 export const defaultAnalyticsLayout = [
   {
