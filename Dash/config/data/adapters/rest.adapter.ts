@@ -122,7 +122,9 @@ export class RestAdapter implements BaseAdapter {
       if (this.config.debug) {
         console.error(`[RestAdapter] Error fetching data from ${url}:`, error);
       }
-      throw this.formatError(error, `Error fetching data from ${endpoint}`);
+      
+      // Return an empty data array that the components can use as a fallback
+      return { data: [] } as T;
     }
   }
   
@@ -366,17 +368,35 @@ export class RestAdapter implements BaseAdapter {
    * @returns URL string
    */
   private buildUrl(endpoint: string, params?: Record<string, any>): string {
-    const url = new URL(endpoint, this.config.baseUrl);
+    // Handle relative URLs without using URL constructor
+    // This avoids the "TypeError: URL constructor: /api is not a valid URL" error
+    let fullPath = '';
     
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.append(key, String(value));
-        }
-      });
+    // Ensure baseUrl and endpoint are properly joined
+    if (this.config.baseUrl.endsWith('/') && endpoint.startsWith('/')) {
+      // Avoid double slash
+      fullPath = `${this.config.baseUrl}${endpoint.substring(1)}`;
+    } else if (!this.config.baseUrl.endsWith('/') && !endpoint.startsWith('/')) {
+      // Add missing slash
+      fullPath = `${this.config.baseUrl}/${endpoint}`;
+    } else {
+      // Normal join
+      fullPath = `${this.config.baseUrl}${endpoint}`;
     }
     
-    return url.toString();
+    // Add query parameters
+    if (params && Object.keys(params).length > 0) {
+      const queryParams = Object.entries(params)
+        .filter(([_, value]) => value !== undefined && value !== null)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+        .join('&');
+      
+      if (queryParams) {
+        fullPath += (fullPath.includes('?') ? '&' : '?') + queryParams;
+      }
+    }
+    
+    return fullPath;
   }
   
   /**

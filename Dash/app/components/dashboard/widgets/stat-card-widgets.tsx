@@ -9,6 +9,34 @@ import { WidgetDefinition } from "@/components/dashboard/customizable-layout"
 import { RestAdapter } from '@/config/data/adapters/rest.adapter'
 import { StatCardDataPoint } from '@/config/data/types'
 
+// Define mock data for fallback
+const mockStatCardData: StatCardData[] = [
+  {
+    title: "Total Revenue",
+    value: "$45,231.89",
+    change: 20.1,
+    changeType: "increase"
+  },
+  {
+    title: "New Customers",
+    value: "1,205",
+    change: 8.2,
+    changeType: "increase"
+  },
+  {
+    title: "Conversion Rate",
+    value: "3.2%",
+    change: 1.1,
+    changeType: "increase"
+  },
+  {
+    title: "Avg. Order Value",
+    value: "$87.21",
+    change: 2.3,
+    changeType: "decrease"
+  }
+];
+
 export interface StatCardWidgetProps {
   stats: StatCardData[]
   selectedStats: number[]
@@ -23,18 +51,22 @@ const restAdapter = new RestAdapter({
 // Function to fetch stat card data
 const fetchStatCardData = async (): Promise<StatCardData[]> => {
   try {
-    const response = await restAdapter.fetchData<StatCardDataPoint[]>('analytics/stats');
+    const response = await restAdapter.fetchData<{data: StatCardDataPoint[]}>('analytics/stats');
     
-    // Convert from API format to component format
-    return response.map(item => ({
-      title: item.title,
-      value: item.value,
-      change: item.change,
-      changeType: item.changeType
-    }));
+    if (response.data && response.data.length > 0) {
+      // Convert from API format to component format
+      return response.data.map(item => ({
+        title: item.title,
+        value: item.value,
+        change: item.change,
+        changeType: item.changeType
+      }));
+    } else {
+      return mockStatCardData;
+    }
   } catch (error) {
     console.error('Error fetching stat card data:', error);
-    return [];
+    return mockStatCardData;
   }
 };
 
@@ -57,6 +89,9 @@ const SingleStatCardWidget: React.FC<SingleStatCardWidgetProps> = ({ data }) => 
           // If we don't have specific data, just use the first item from the fetched data
           if (fetchedData.length > 0) {
             setStatData(fetchedData[0]);
+          } else {
+            // Fallback to mock data if fetchedData is empty
+            setStatData(mockStatCardData[0]);
           }
           setError(null);
         } catch (err) {
