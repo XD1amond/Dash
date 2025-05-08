@@ -16,52 +16,7 @@ import {
 } from '../../../../config/data/types';
 import { RestAdapter } from '../../../../config/data/adapters/rest.adapter';
 
-// Define mock data for fallback
-const mockRevenueData: RevenueDataPoint[] = [
-  { date: '2024-01', revenue: 45000 },
-  { date: '2024-02', revenue: 52000 },
-  { date: '2024-03', revenue: 49000 },
-  { date: '2024-04', revenue: 63000 },
-  { date: '2024-05', revenue: 58000 },
-  { date: '2024-06', revenue: 72000 },
-  { date: '2024-07', revenue: 78000 },
-  { date: '2024-08', revenue: 82000 },
-  { date: '2024-09', revenue: 87000 },
-  { date: '2024-10', revenue: 92000 },
-  { date: '2024-11', revenue: 98000 },
-  { date: '2024-12', revenue: 110000 }
-];
-
-const mockSalesData: SalesDataPoint[] = [
-  { name: 'Electronics', value: 35, color: '#4f46e5' },
-  { name: 'Clothing', value: 25, color: '#0ea5e9' },
-  { name: 'Home & Kitchen', value: 20, color: '#10b981' },
-  { name: 'Books', value: 10, color: '#f59e0b' },
-  { name: 'Other', value: 10, color: '#6b7280' }
-];
-
-const mockVisitorsData: VisitorsDataPoint[] = [
-  { name: 'Direct', value: 30, color: '#4f46e5' },
-  { name: 'Organic Search', value: 25, color: '#0ea5e9' },
-  { name: 'Paid Search', value: 15, color: '#10b981' },
-  { name: 'Social', value: 20, color: '#f59e0b' },
-  { name: 'Referral', value: 10, color: '#6b7280' }
-];
-
-const mockConversionData: ConversionDataPoint[] = [
-  { date: '2024-01', conversion: 2.1 },
-  { date: '2024-02', conversion: 2.3 },
-  { date: '2024-03', conversion: 2.5 },
-  { date: '2024-04', conversion: 2.2 },
-  { date: '2024-05', conversion: 2.4 },
-  { date: '2024-06', conversion: 2.7 },
-  { date: '2024-07', conversion: 2.9 },
-  { date: '2024-08', conversion: 3.1 },
-  { date: '2024-09', conversion: 3.0 },
-  { date: '2024-10', conversion: 3.2 },
-  { date: '2024-11', conversion: 3.4 },
-  { date: '2024-12', conversion: 3.6 }
-];
+// Create a REST adapter for API calls
 
 // Create a REST adapter for API calls
 const restAdapter = new RestAdapter({
@@ -83,10 +38,10 @@ const fetchRevenueData = async (): Promise<RevenueDataPoint[]> => {
       interval: 'month'
     });
     
-    return response.data.length > 0 ? response.data : mockRevenueData;
+    return response.data || [];
   } catch (error) {
     console.error('Error fetching revenue data:', error);
-    return mockRevenueData;
+    return [];
   }
 };
 
@@ -103,10 +58,10 @@ const fetchSalesData = async (): Promise<SalesDataPoint[]> => {
       to: to.toISOString()
     });
     
-    return response.data.length > 0 ? response.data : mockSalesData;
+    return response.data || [];
   } catch (error) {
     console.error('Error fetching sales data:', error);
-    return mockSalesData;
+    return [];
   }
 };
 
@@ -123,10 +78,10 @@ const fetchVisitorsData = async (): Promise<VisitorsDataPoint[]> => {
       to: to.toISOString()
     });
     
-    return response.data.length > 0 ? response.data : mockVisitorsData;
+    return response.data || [];
   } catch (error) {
     console.error('Error fetching visitors data:', error);
-    return mockVisitorsData;
+    return [];
   }
 };
 
@@ -144,10 +99,10 @@ const fetchConversionData = async (): Promise<ConversionDataPoint[]> => {
       interval: 'month'
     });
     
-    return response.data.length > 0 ? response.data : mockConversionData;
+    return response.data || [];
   } catch (error) {
     console.error('Error fetching conversion data:', error);
-    return mockConversionData;
+    return [];
   }
 };
 

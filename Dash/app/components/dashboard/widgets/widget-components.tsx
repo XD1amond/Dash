@@ -164,15 +164,13 @@ export const ExpandedWidgetView = ({
                 <h3 className="text-lg font-medium">About this widget</h3>
                 <p>{description}</p>
                 <p className="text-muted-foreground">
-                  This widget provides valuable insights into your business performance.
-                  You can use this data to make informed decisions and track your progress over time.
+                  Use this widget to visualize and analyze your data.
                 </p>
                 <div className="pt-4">
                   <h4 className="font-medium mb-2">Widget Details</h4>
                   <ul className="list-disc pl-5 space-y-1 text-sm">
-                    <li>Category: {title.split(" ")[0]}</li>
-                    <li>Data updated: Daily</li>
-                    <li>Last updated: Today</li>
+                    <li>ID: {chartId}</li>
+                    <li>Data points: {data?.length || 0}</li>
                   </ul>
                 </div>
               </div>

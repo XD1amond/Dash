@@ -11,30 +11,7 @@ import {
 } from '@/config/data/types';
 import { RestAdapter } from '@/config/data/adapters/rest.adapter';
 
-// Define mock data for fallback
-const revenueByChannelData: RevenueByChannelItem[] = [
-  { channel: 'Online Store', revenue: '$345,678', percentage: 45 },
-  { channel: 'Marketplace', revenue: '$234,567', percentage: 30 },
-  { channel: 'Retail Partners', revenue: '$123,456', percentage: 15 },
-  { channel: 'Direct Sales', revenue: '$78,901', percentage: 10 }
-];
-
-const customerLifetimeValueData: CustomerLifetimeValueItem[] = [
-  { segment: 'Premium', value: '$2,345', orders: '12.3 avg', retention: '87%' },
-  { segment: 'Standard', value: '$1,234', orders: '8.7 avg', retention: '76%' },
-  { segment: 'Basic', value: '$567', orders: '4.2 avg', retention: '65%' }
-];
-
-const revenueGrowthData = {
-  growthPercentage: '+12.5%',
-  comparisonPeriod: 'Compared to last year'
-};
-
-const customerAcquisitionData = {
-  cac: '$34.56',
-  change: '-2.3%',
-  period: 'from last quarter'
-};
+// Create a REST adapter for API calls
 
 // Create a REST adapter for API calls
 const restAdapter = new RestAdapter({
@@ -46,10 +23,10 @@ const restAdapter = new RestAdapter({
 const fetchRevenueByChannel = async (): Promise<RevenueByChannelItem[]> => {
   try {
     const response = await restAdapter.fetchData<{data: RevenueByChannelItem[]}>('business/revenue-by-channel');
-    return response.data.length > 0 ? response.data : revenueByChannelData;
+    return response.data || [];
   } catch (error) {
     console.error('Error fetching revenue by channel data:', error);
-    return revenueByChannelData;
+    return [];
   }
 };
 
@@ -57,10 +34,10 @@ const fetchRevenueByChannel = async (): Promise<RevenueByChannelItem[]> => {
 const fetchCustomerLifetimeValue = async (): Promise<CustomerLifetimeValueItem[]> => {
   try {
     const response = await restAdapter.fetchData<{data: CustomerLifetimeValueItem[]}>('business/customer-lifetime-value');
-    return response.data.length > 0 ? response.data : customerLifetimeValueData;
+    return response.data || [];
   } catch (error) {
     console.error('Error fetching customer lifetime value data:', error);
-    return customerLifetimeValueData;
+    return [];
   }
 };
 
@@ -77,11 +54,17 @@ const fetchRevenueGrowth = async (): Promise<{growthPercentage: string, comparis
     if (response.data) {
       return response.data;
     } else {
-      return revenueGrowthData;
+      return {
+        growthPercentage: '+0.0%',
+        comparisonPeriod: 'Compared to last year'
+      };
     }
   } catch (error) {
     console.error('Error fetching revenue growth data:', error);
-    return revenueGrowthData;
+    return {
+      growthPercentage: '+0.0%',
+      comparisonPeriod: 'Compared to last year'
+    };
   }
 };
 
@@ -99,11 +82,19 @@ const fetchCustomerAcquisition = async (): Promise<{cac: string, change: string,
     if (response.data) {
       return response.data;
     } else {
-      return customerAcquisitionData;
+      return {
+        cac: '$0.00',
+        change: '0%',
+        period: 'from last quarter'
+      };
     }
   } catch (error) {
     console.error('Error fetching customer acquisition data:', error);
-    return customerAcquisitionData;
+    return {
+      cac: '$0.00',
+      change: '0%',
+      period: 'from last quarter'
+    };
   }
 };
 

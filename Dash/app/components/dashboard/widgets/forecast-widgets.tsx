@@ -11,126 +11,7 @@ import {
 } from '@/config/data/types/forecast.types';
 import { RestAdapter } from '@/config/data/adapters/rest.adapter';
 
-// Define mock data for fallback
-// This data would normally come from an API, but we're defining it here for demo purposes
-const salesForecastData: SalesForecastItem[] = [
-  { month: 'Jan', actual: 245000, forecast: 245000 },
-  { month: 'Feb', actual: 267000, forecast: 260000 },
-  { month: 'Mar', actual: 278000, forecast: 275000 },
-  { month: 'Apr', actual: 284000, forecast: 290000 },
-  { month: 'May', actual: 298000, forecast: 305000 },
-  { month: 'Jun', actual: 312000, forecast: 320000 },
-  { month: 'Jul', actual: null, forecast: 335000 },
-  { month: 'Aug', actual: null, forecast: 350000 },
-  { month: 'Sep', actual: null, forecast: 365000 },
-  { month: 'Oct', actual: null, forecast: 380000 },
-  { month: 'Nov', actual: null, forecast: 395000 },
-  { month: 'Dec', actual: null, forecast: 410000 }
-];
-
-const inventoryForecastData: InventoryForecastItem[] = [
-  {
-    product: 'Smartphone X',
-    currentStock: 234,
-    projectedDemand: 345,
-    reorderPoint: 100,
-    reorderQty: 200,
-    daysUntilReorder: 12,
-    stockoutRisk: 'low',
-    productId: 'prod-1',
-    category: 'Electronics'
-  },
-  {
-    product: 'Wireless Earbuds',
-    currentStock: 567,
-    projectedDemand: 678,
-    reorderPoint: 150,
-    reorderQty: 300,
-    daysUntilReorder: 20,
-    stockoutRisk: 'low',
-    productId: 'prod-2',
-    category: 'Electronics'
-  },
-  {
-    product: 'Smart Watch',
-    currentStock: 123,
-    projectedDemand: 234,
-    reorderPoint: 50,
-    reorderQty: 100,
-    daysUntilReorder: 8,
-    stockoutRisk: 'medium',
-    productId: 'prod-3',
-    category: 'Electronics'
-  },
-  {
-    product: 'Laptop Pro',
-    currentStock: 78,
-    projectedDemand: 156,
-    reorderPoint: 30,
-    reorderQty: 60,
-    daysUntilReorder: 0,
-    stockoutRisk: 'high',
-    productId: 'prod-4',
-    category: 'Electronics'
-  },
-  {
-    product: 'Bluetooth Speaker',
-    currentStock: 345,
-    projectedDemand: 432,
-    reorderPoint: 100,
-    reorderQty: 200,
-    daysUntilReorder: 15,
-    stockoutRisk: 'low',
-    productId: 'prod-5',
-    category: 'Electronics'
-  }
-];
-
-// Define trend prediction data
-const trendPredictionData: TrendPredictionItem[] = [
-  {
-    trend: 'Eco-friendly Products',
-    status: 'Rising',
-    growth: '+15.2%',
-    description: 'Increasing demand for sustainable products',
-    confidence: 85,
-    impactLevel: 'high',
-    timeFrame: 'long-term',
-    relatedCategories: ['Home & Kitchen', 'Beauty']
-  },
-  {
-    trend: 'Smart Home Devices',
-    status: 'Rising',
-    growth: '+22.5%',
-    description: 'Growing interest in connected home products',
-    confidence: 92,
-    impactLevel: 'high',
-    timeFrame: 'medium-term',
-    relatedCategories: ['Electronics']
-  },
-  {
-    trend: 'Fitness Trackers',
-    status: 'Stable',
-    growth: '+3.1%',
-    description: 'Consistent demand for fitness monitoring devices',
-    confidence: 78,
-    impactLevel: 'medium',
-    timeFrame: 'short-term',
-    relatedCategories: ['Electronics', 'Sports']
-  },
-  {
-    trend: 'Tablet Computers',
-    status: 'Declining',
-    growth: '-5.8%',
-    description: 'Decreasing interest as smartphones get larger',
-    confidence: 65,
-    impactLevel: 'medium',
-    timeFrame: 'medium-term',
-    relatedCategories: ['Electronics']
-  }
-];
-
-// No need for enhancedInventoryForecastData since we've defined the full data above
+// Create a REST adapter for API calls
 
 // Create a REST adapter for API calls
 const restAdapter = new RestAdapter({
@@ -142,10 +23,10 @@ const restAdapter = new RestAdapter({
 const fetchSalesForecast = async (): Promise<SalesForecastItem[]> => {
   try {
     const response = await restAdapter.fetchData<{data: SalesForecastItem[]}>('forecast/sales');
-    return response.data.length > 0 ? response.data : salesForecastData;
+    return response.data || [];
   } catch (error) {
     console.error('Error fetching sales forecast data:', error);
-    return salesForecastData;
+    return [];
   }
 };
 
@@ -153,10 +34,10 @@ const fetchSalesForecast = async (): Promise<SalesForecastItem[]> => {
 const fetchInventoryForecast = async (): Promise<InventoryForecastItem[]> => {
   try {
     const response = await restAdapter.fetchData<{data: InventoryForecastItem[]}>('forecast/inventory');
-    return response.data.length > 0 ? response.data : inventoryForecastData;
+    return response.data || [];
   } catch (error) {
     console.error('Error fetching inventory forecast data:', error);
-    return inventoryForecastData;
+    return [];
   }
 };
 
@@ -164,10 +45,10 @@ const fetchInventoryForecast = async (): Promise<InventoryForecastItem[]> => {
 const fetchTrendPrediction = async (): Promise<TrendPredictionItem[]> => {
   try {
     const response = await restAdapter.fetchData<{data: TrendPredictionItem[]}>('forecast/trends');
-    return response.data.length > 0 ? response.data : trendPredictionData;
+    return response.data || [];
   } catch (error) {
     console.error('Error fetching trend prediction data:', error);
-    return trendPredictionData;
+    return [];
   }
 };
 
@@ -245,7 +126,7 @@ const RevenueForecastWidget: React.FC<RevenueForecastProps> = ({
   // Calculate max value for percentage calculation
   const maxForecast = forecastData.length > 0
     ? Math.max(...forecastData.map(item => item.forecast || 0))
-    : 410000;
+    : 100000; // Default value if no data
 
   const currentYear = new Date().getFullYear();
 

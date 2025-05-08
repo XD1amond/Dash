@@ -9,33 +9,7 @@ import { WidgetDefinition } from "@/components/dashboard/customizable-layout"
 import { RestAdapter } from '@/config/data/adapters/rest.adapter'
 import { StatCardDataPoint } from '@/config/data/types'
 
-// Define mock data for fallback
-const mockStatCardData: StatCardData[] = [
-  {
-    title: "Total Revenue",
-    value: "$45,231.89",
-    change: 20.1,
-    changeType: "increase"
-  },
-  {
-    title: "New Customers",
-    value: "1,205",
-    change: 8.2,
-    changeType: "increase"
-  },
-  {
-    title: "Conversion Rate",
-    value: "3.2%",
-    change: 1.1,
-    changeType: "increase"
-  },
-  {
-    title: "Avg. Order Value",
-    value: "$87.21",
-    change: 2.3,
-    changeType: "decrease"
-  }
-];
+// Create a REST adapter for API calls
 
 export interface StatCardWidgetProps {
   stats: StatCardData[]
@@ -62,11 +36,11 @@ const fetchStatCardData = async (): Promise<StatCardData[]> => {
         changeType: item.changeType
       }));
     } else {
-      return mockStatCardData;
+      return [];
     }
   } catch (error) {
     console.error('Error fetching stat card data:', error);
-    return mockStatCardData;
+    return [];
   }
 };
 
@@ -90,8 +64,13 @@ const SingleStatCardWidget: React.FC<SingleStatCardWidgetProps> = ({ data }) => 
           if (fetchedData.length > 0) {
             setStatData(fetchedData[0]);
           } else {
-            // Fallback to mock data if fetchedData is empty
-            setStatData(mockStatCardData[0]);
+            // Create a default stat card if no data is available
+            setStatData({
+              title: "No Data",
+              value: "0",
+              change: 0,
+              changeType: "increase" // Using "increase" as it's an allowed value
+            });
           }
           setError(null);
         } catch (err) {
