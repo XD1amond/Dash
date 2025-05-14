@@ -91,24 +91,23 @@ const CustomerSegmentsWidget: React.FC<CustomerSegmentsProps> = ({ data = [] }) 
   const [loading, setLoading] = useState<boolean>(data.length === 0);
   const [error, setError] = useState<string | null>(null);
 
+  // Use the data directly without fetching
   useEffect(() => {
-    const loadData = async () => {
-      if (data.length === 0) {
-        setLoading(true);
-        try {
-          const fetchedData = await fetchCustomerSegmentation();
-          setSegmentData(fetchedData);
-          setError(null);
-        } catch (err) {
-          setError('Failed to load customer segment data');
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
+    // If we have data from props, use it
+    if (data.length > 0) {
+      setSegmentData(data);
+      setLoading(false);
+    } else {
+      // Create mock data if no data is provided
+      const mockData: CustomerSegmentItem[] = [
+        { segment: "New Customers", count: "250", percentage: 25, value: "$12,500" },
+        { segment: "Returning", count: "400", percentage: 40, value: "$28,000" },
+        { segment: "Loyal", count: "200", percentage: 20, value: "$18,000" },
+        { segment: "VIP", count: "150", percentage: 15, value: "$22,500" }
+      ];
+      setSegmentData(mockData);
+      setLoading(false);
+    }
   }, [data]);
 
   // Define segment colors
@@ -186,25 +185,28 @@ const CustomerSatisfactionWidget: React.FC<CustomerSatisfactionProps> = ({
   const [loading, setLoading] = useState<boolean>(!rating);
   const [error, setError] = useState<string | null>(null);
 
+  // Use the data directly without fetching
   useEffect(() => {
-    const loadData = async () => {
-      if (!rating) {
-        setLoading(true);
-        try {
-          const fetchedData = await fetchCustomerSatisfaction();
-          setSatisfactionData(fetchedData);
-          setError(null);
-        } catch (err) {
-          setError('Failed to load satisfaction data');
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
-  }, [rating]);
+    // If we have data from props, use it
+    if (rating) {
+      setSatisfactionData({
+        rating: rating,
+        reviewCount: reviewCount || "0",
+        change: change || "0.0",
+        period: period || "from last quarter"
+      });
+      setLoading(false);
+    } else {
+      // Create mock data if no data is provided
+      setSatisfactionData({
+        rating: "4.2/5.0",
+        reviewCount: "1,245",
+        change: "+0.3",
+        period: "from last quarter"
+      });
+      setLoading(false);
+    }
+  }, [rating, reviewCount, change, period]);
 
   // Calculate how many full stars to show based on rating
   const ratingValue = satisfactionData.rating ? parseFloat(satisfactionData.rating.split('/')[0]) : 0;
@@ -254,24 +256,23 @@ const CustomerFeedbackWidget: React.FC<CustomerFeedbackProps> = ({ data = [] }) 
   const [loading, setLoading] = useState<boolean>(data.length === 0);
   const [error, setError] = useState<string | null>(null);
 
+  // Use the data directly without fetching
   useEffect(() => {
-    const loadData = async () => {
-      if (data.length === 0) {
-        setLoading(true);
-        try {
-          const fetchedData = await fetchCustomerFeedback();
-          setFeedbackData(fetchedData);
-          setError(null);
-        } catch (err) {
-          setError('Failed to load feedback data');
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
+    // If we have data from props, use it
+    if (data.length > 0) {
+      setFeedbackData(data);
+      setLoading(false);
+    } else {
+      // Create mock data if no data is provided
+      const mockData = [
+        { category: "Product Quality", positive: 75, neutral: 15, negative: 10 },
+        { category: "Customer Service", positive: 80, neutral: 10, negative: 10 },
+        { category: "Shipping Speed", positive: 65, neutral: 20, negative: 15 },
+        { category: "Website Experience", positive: 70, neutral: 20, negative: 10 }
+      ];
+      setFeedbackData(mockData);
+      setLoading(false);
+    }
   }, [data]);
 
   return (

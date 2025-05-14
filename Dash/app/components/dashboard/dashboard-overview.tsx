@@ -63,11 +63,115 @@ export function DashboardOverview({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date(),
   })
+  const [widgetKey, setWidgetKey] = useState(Date.now()) // Key for forcing widget re-renders
+  const [initialRender, setInitialRender] = useState(true) // Track initial render
+  
+  // Force immediate data loading on initial render
+  useEffect(() => {
+    if (initialRender) {
+      // Force a re-render after a short delay to ensure widgets load
+      const timer = setTimeout(() => {
+        setWidgetKey(Date.now());
+        setInitialRender(false);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [initialRender]);
+  
+  // Listen for widget deletion events
+  useEffect(() => {
+    const handleWidgetDeleted = () => {
+      console.log("Widget deleted event received, refreshing layout");
+      // Force a re-render of all widgets
+      setWidgetKey(Date.now());
+    };
+    
+    document.addEventListener('widget-deleted', handleWidgetDeleted);
+    
+    return () => {
+      document.removeEventListener('widget-deleted', handleWidgetDeleted);
+    };
+  }, []);
 
   // --- Widget Definitions (Memoized) ---
-  // Use useCallback to memoize widget creation functions based on dependencies
-  const statCardWidgets = React.useMemo(() => createStatCardWidgets(stats), [stats]);
-  const overviewChartWidgets = React.useMemo(() => createOverviewWidgets(revenueData, salesData, visitorsData, conversionData), [revenueData, salesData, visitorsData, conversionData]);
+  // Create mock data for widgets
+  const mockStats = React.useMemo(() => [
+    {
+      title: "Total Revenue",
+      value: "$124,568.32",
+      change: 12.5,
+      changeType: "increase" as const
+    },
+    {
+      title: "Orders",
+      value: "1,429",
+      change: 8.2,
+      changeType: "increase" as const
+    },
+    {
+      title: "Customers",
+      value: "9,324",
+      change: 5.3,
+      changeType: "increase" as const
+    },
+    {
+      title: "Conversion Rate",
+      value: "3.2%",
+      change: 1.1,
+      changeType: "increase" as const
+    }
+  ], []);
+
+  const mockRevenueData = React.useMemo(() => [
+    { date: "2024-01", revenue: 45000 },
+    { date: "2024-02", revenue: 52000 },
+    { date: "2024-03", revenue: 49000 },
+    { date: "2024-04", revenue: 63000 },
+    { date: "2024-05", revenue: 58000 },
+    { date: "2024-06", revenue: 72000 },
+    { date: "2024-07", revenue: 68000 },
+    { date: "2024-08", revenue: 75000 },
+    { date: "2024-09", revenue: 82000 },
+    { date: "2024-10", revenue: 87000 },
+    { date: "2024-11", revenue: 92000 },
+    { date: "2024-12", revenue: 98000 }
+  ], []);
+
+  const mockSalesData = React.useMemo(() => [
+    { name: "Electronics", value: 35, color: "#4f46e5" },
+    { name: "Clothing", value: 25, color: "#06b6d4" },
+    { name: "Home & Kitchen", value: 20, color: "#10b981" },
+    { name: "Books", value: 10, color: "#f59e0b" },
+    { name: "Other", value: 10, color: "#ef4444" }
+  ], []);
+
+  const mockVisitorsData = React.useMemo(() => [
+    { name: "Direct", value: 4500, color: "#4f46e5" },
+    { name: "Organic Search", value: 3200, color: "#06b6d4" },
+    { name: "Social Media", value: 2100, color: "#10b981" },
+    { name: "Referral", value: 1800, color: "#f59e0b" },
+    { name: "Email", value: 1200, color: "#ef4444" }
+  ], []);
+
+  const mockConversionData = React.useMemo(() => [
+    { date: "2024-01", conversion: 2.8 },
+    { date: "2024-02", conversion: 2.9 },
+    { date: "2024-03", conversion: 3.0 },
+    { date: "2024-04", conversion: 3.1 },
+    { date: "2024-05", conversion: 3.0 },
+    { date: "2024-06", conversion: 3.2 },
+    { date: "2024-07", conversion: 3.3 },
+    { date: "2024-08", conversion: 3.4 },
+    { date: "2024-09", conversion: 3.5 },
+    { date: "2024-10", conversion: 3.6 },
+    { date: "2024-11", conversion: 3.7 },
+    { date: "2024-12", conversion: 3.8 }
+  ], []);
+
+  // Use mock data instead of props data
+  const statCardWidgets = React.useMemo(() => createStatCardWidgets(mockStats), [mockStats, widgetKey]);
+  const overviewChartWidgets = React.useMemo(() => createOverviewWidgets(mockRevenueData, mockSalesData, mockVisitorsData, mockConversionData), [mockRevenueData, mockSalesData, mockVisitorsData, mockConversionData, widgetKey]);
   
   // Import widgets with demo data from the connector
   const analyticsWidgetsWithDemoData = React.useMemo(() => {
@@ -372,6 +476,7 @@ export function DashboardOverview({
         <div className={cn("mb-6 rounded-lg", isEditing ? "bg-muted/10 ring-1 ring-blue-300/50 transition-all duration-200" : "")}>
           {/* Note: Outline applied to wrapper, padding handled by CustomizableLayout's internal wrapper */}
           <CustomizableLayout
+            key={`header-${widgetKey}`} // Add key to force re-render
             instanceId="header"
             isEditing={isEditing}
             availableWidgets={availableWidgetsMap['header']}
@@ -382,7 +487,15 @@ export function DashboardOverview({
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => {
+            setActiveTab(value);
+            // Force re-render of all widgets by changing the key
+            setWidgetKey(Date.now());
+          }}
+          className="space-y-4"
+        >
           <TabsList className="flex flex-wrap">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="business">Business</TabsTrigger>
@@ -399,14 +512,15 @@ export function DashboardOverview({
           {Object.keys(tabLayoutStates).map(tabId => (
             <TabsContent key={tabId} value={tabId} className="mt-0"> {/* Ensure no top margin from TabsContent */}
                <div className={cn("space-y-4 rounded-lg", isEditing && activeTab === tabId ? "bg-muted/10 ring-1 ring-blue-300/50 transition-all duration-200" : "")}>
-                 <CustomizableLayout
-                   instanceId={tabId}
-                   isEditing={isEditing}
-                   availableWidgets={availableWidgetsMap[tabId]}
-                   layout={tabLayoutStates[tabId]}
-                   onLayoutChange={handleLayoutChange}
-                   onAreaSelect={handleAreaSelect}
-                 />
+                  <CustomizableLayout
+                    key={`${tabId}-${widgetKey}`} // Add key to force re-render
+                    instanceId={tabId}
+                    isEditing={isEditing}
+                    availableWidgets={availableWidgetsMap[tabId]}
+                    layout={tabLayoutStates[tabId]}
+                    onLayoutChange={handleLayoutChange}
+                    onAreaSelect={handleAreaSelect}
+                  />
                </div>
             </TabsContent>
           ))}

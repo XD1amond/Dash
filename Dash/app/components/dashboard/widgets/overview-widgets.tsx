@@ -112,28 +112,14 @@ interface RevenueChartWidgetProps {
 }
 
 const RevenueChartWidget: React.FC<RevenueChartWidgetProps> = ({ data = [] }) => {
+  // Use the data directly without fetching
   const [revenueData, setRevenueData] = useState<RevenueDataPoint[]>(data);
-  const [loading, setLoading] = useState<boolean>(data.length === 0);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Update data when props change
   useEffect(() => {
-    const loadData = async () => {
-      if (data.length === 0) {
-        setLoading(true);
-        try {
-          const fetchedData = await fetchRevenueData();
-          setRevenueData(fetchedData);
-          setError(null);
-        } catch (err) {
-          setError('Failed to load revenue data');
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
+    setRevenueData(data);
   }, [data]);
 
   return (
@@ -170,28 +156,14 @@ interface SalesChartWidgetProps {
 }
 
 const SalesChartWidget: React.FC<SalesChartWidgetProps> = ({ data = [] }) => {
+  // Use the data directly without fetching
   const [salesData, setSalesData] = useState<SalesDataPoint[]>(data);
-  const [loading, setLoading] = useState<boolean>(data.length === 0);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Update data when props change
   useEffect(() => {
-    const loadData = async () => {
-      if (data.length === 0) {
-        setLoading(true);
-        try {
-          const fetchedData = await fetchSalesData();
-          setSalesData(fetchedData);
-          setError(null);
-        } catch (err) {
-          setError('Failed to load sales data');
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
+    setSalesData(data);
   }, [data]);
 
   return (
@@ -228,28 +200,14 @@ interface VisitorsChartWidgetProps {
 }
 
 const VisitorsChartWidget: React.FC<VisitorsChartWidgetProps> = ({ data = [] }) => {
+  // Use the data directly without fetching
   const [visitorsData, setVisitorsData] = useState<VisitorsDataPoint[]>(data);
-  const [loading, setLoading] = useState<boolean>(data.length === 0);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Update data when props change
   useEffect(() => {
-    const loadData = async () => {
-      if (data.length === 0) {
-        setLoading(true);
-        try {
-          const fetchedData = await fetchVisitorsData();
-          setVisitorsData(fetchedData);
-          setError(null);
-        } catch (err) {
-          setError('Failed to load visitors data');
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
+    setVisitorsData(data);
   }, [data]);
 
   return (
@@ -286,28 +244,14 @@ interface ConversionChartWidgetProps {
 }
 
 const ConversionChartWidget: React.FC<ConversionChartWidgetProps> = ({ data = [] }) => {
+  // Use the data directly without fetching
   const [conversionData, setConversionData] = useState<ConversionDataPoint[]>(data);
-  const [loading, setLoading] = useState<boolean>(data.length === 0);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Update data when props change
   useEffect(() => {
-    const loadData = async () => {
-      if (data.length === 0) {
-        setLoading(true);
-        try {
-          const fetchedData = await fetchConversionData();
-          setConversionData(fetchedData);
-          setError(null);
-        } catch (err) {
-          setError('Failed to load conversion data');
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadData();
+    setConversionData(data);
   }, [data]);
 
   return (

@@ -200,16 +200,38 @@ export function CustomizableLayout({
 
   // Remove widget from section - Reports change via prop
   const removeWidgetFromSection = (widgetId: string, sectionId: string, index: number) => {
-    const newLayout = layout.map(section => {
-      if (section.id === sectionId) {
-        const widgets = [...section.widgets]
-        widgets.splice(index, 1)
-        return { ...section, widgets }
+    console.log(`Removing widget ${widgetId} from section ${sectionId} at index ${index}`);
+    
+    try {
+      // Find the section directly in the original layout
+      const sectionToUpdate = layout.find(section => section.id === sectionId);
+      
+      if (sectionToUpdate) {
+        // Create a new layout with the widget removed
+        const newLayout = layout.map(section => {
+          if (section.id === sectionId) {
+            // Filter out the widget with the matching ID
+            return {
+              ...section,
+              widgets: section.widgets.filter(id => id !== widgetId)
+            };
+          }
+          return section;
+        });
+        
+        console.log("Widget removed, new layout:", newLayout);
+        
+        // Report change to parent
+        onLayoutChange(instanceId, newLayout);
+        
+        // Force a second update after a short delay
+        setTimeout(() => {
+          onLayoutChange(instanceId, newLayout);
+        }, 50);
       }
-      return section
-    })
-    // Report change to parent
-    onLayoutChange(instanceId, newLayout)
+    } catch (error) {
+      console.error("Error removing widget:", error);
+    }
   }
 
   // Removed internal state management functions:
@@ -356,15 +378,26 @@ function SortableWidget({ id, widget, isEditing, sectionId, onRemoveWidget }: So
           {/* <button {...listeners} className="absolute top-1 left-1 z-20 p-1 cursor-grab"><GripVertical className="h-4 w-4" /></button> */}
 
           {/* Remove Button */}
-          <div className="absolute -top-2 -right-2 z-40">
+          <div className="absolute -top-2 -right-2 z-[100]">
             <Button
               variant="destructive"
               size="icon"
-              className="h-6 w-6 rounded-full shadow opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
+              className="h-6 w-6 rounded-full shadow opacity-100 transition-opacity"
               onClick={(e) => {
                 e.stopPropagation(); // Prevent drag start/area click
-                // Need the index here, useSortable provides it
+                e.preventDefault(); // Prevent any default behavior
+                
+                // Directly call the remove function
                 onRemoveWidget(id, sectionId, index);
+                
+                // Add a console log to verify the click is registered
+                console.log(`Delete button clicked for widget ${id} in section ${sectionId}`);
+                
+                // Force a re-render of the parent component
+                setTimeout(() => {
+                  const event = new CustomEvent('widget-deleted', { detail: { id, sectionId } });
+                  document.dispatchEvent(event);
+                }, 10);
               }}
               aria-label="Remove widget"
             >
