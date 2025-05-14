@@ -23,6 +23,14 @@ import {
   generateAllAnalyticsData
 } from "../data/analytics-data"
 
+// Import widget data connectors
+import {
+  createAnalyticsWidgetsWithDemoData,
+  createBusinessWidgetsWithDemoData,
+  createCustomerWidgetsWithDemoData,
+  createForecastWidgetsWithDemoData
+} from "../utils/widget-data-connector"
+
 // Import legacy mock data generators for components not yet updated
 import {
   generateOrders,

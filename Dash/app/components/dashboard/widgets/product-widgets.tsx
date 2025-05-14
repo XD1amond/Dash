@@ -340,14 +340,18 @@ const getRelatedWidgets = (widgetId: string) => {
   return otherWidgets.slice(0, 2); // Return up to 2 related widgets
 };
 
-// Define product performance widgets
-export const productWidgets: WidgetDefinition[] = [
+// Create product widgets with data
+export const createProductWidgets = (
+  topProductsData: TopProduct[] = [],
+  inventoryStatusData: ProductInventory[] = [],
+  productReturnsData: ProductReturn[] = []
+): WidgetDefinition[] => [
   {
     id: "top-products",
     name: "Top Products",
     description: "Best selling products by revenue",
     category: "Products",
-    component: <TopProductsWidget data={[]} />,
+    component: <TopProductsWidget data={topProductsData} />,
     defaultSize: "medium"
   },
   {
@@ -355,7 +359,7 @@ export const productWidgets: WidgetDefinition[] = [
     name: "Inventory Status",
     description: "Current inventory levels by category",
     category: "Products",
-    component: <InventoryStatusWidget data={[]} />,
+    component: <InventoryStatusWidget data={inventoryStatusData} />,
     defaultSize: "medium"
   },
   {
@@ -363,10 +367,13 @@ export const productWidgets: WidgetDefinition[] = [
     name: "Product Returns",
     description: "Return rate by product category",
     category: "Products",
-    component: <ProductReturnsWidget data={[]} />,
+    component: <ProductReturnsWidget data={productReturnsData} />,
     defaultSize: "small"
   }
 ];
+
+// Define product widgets with empty data for backward compatibility
+export const productWidgets = createProductWidgets();
 
 // Define default layout for product widgets
 export const defaultProductLayout: LayoutSection[] = [

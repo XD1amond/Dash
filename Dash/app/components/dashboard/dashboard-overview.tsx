@@ -68,42 +68,149 @@ export function DashboardOverview({
   // Use useCallback to memoize widget creation functions based on dependencies
   const statCardWidgets = React.useMemo(() => createStatCardWidgets(stats), [stats]);
   const overviewChartWidgets = React.useMemo(() => createOverviewWidgets(revenueData, salesData, visitorsData, conversionData), [revenueData, salesData, visitorsData, conversionData]);
+  
+  // Import widgets with demo data from the connector
+  const analyticsWidgetsWithDemoData = React.useMemo(() => {
+    try {
+      // Try to import from demo/utils/widget-data-connector if available
+      const { createAnalyticsWidgetsWithDemoData } = require('../../../../demo/utils/widget-data-connector');
+      return createAnalyticsWidgetsWithDemoData();
+    } catch (e) {
+      // Fall back to default widgets if connector is not available
+      return analyticsWidgets;
+    }
+  }, []);
+  
+  const businessWidgetsWithDemoData = React.useMemo(() => {
+    try {
+      const { createBusinessWidgetsWithDemoData } = require('../../../../demo/utils/widget-data-connector');
+      return createBusinessWidgetsWithDemoData();
+    } catch (e) {
+      return businessWidgets;
+    }
+  }, []);
+  
+  const customerWidgetsWithDemoData = React.useMemo(() => {
+    try {
+      const { createCustomerWidgetsWithDemoData } = require('../../../../demo/utils/widget-data-connector');
+      return createCustomerWidgetsWithDemoData();
+    } catch (e) {
+      return customerWidgets;
+    }
+  }, []);
+  
+  const forecastWidgetsWithDemoData = React.useMemo(() => {
+    try {
+      const { createForecastWidgetsWithDemoData } = require('../../../../demo/utils/widget-data-connector');
+      return createForecastWidgetsWithDemoData();
+    } catch (e) {
+      return forecastWidgets;
+    }
+  }, []);
+  
+  const marketingWidgetsWithDemoData = React.useMemo(() => {
+    try {
+      const { createMarketingWidgetsWithDemoData } = require('../../../../demo/utils/widget-data-connector');
+      return createMarketingWidgetsWithDemoData();
+    } catch (e) {
+      return marketingWidgets;
+    }
+  }, []);
+  
+  const websiteWidgetsWithDemoData = React.useMemo(() => {
+    try {
+      const { createWebsiteWidgetsWithDemoData } = require('../../../../demo/utils/widget-data-connector');
+      return createWebsiteWidgetsWithDemoData();
+    } catch (e) {
+      return websiteWidgets;
+    }
+  }, []);
+  
+  const productWidgetsWithDemoData = React.useMemo(() => {
+    try {
+      const { createProductWidgetsWithDemoData } = require('../../../../demo/utils/widget-data-connector');
+      return createProductWidgetsWithDemoData();
+    } catch (e) {
+      return productWidgets;
+    }
+  }, []);
+  
+  const performanceWidgetsWithDemoData = React.useMemo(() => {
+    try {
+      const { createPerformanceWidgetsWithDemoData } = require('../../../../demo/utils/widget-data-connector');
+      return createPerformanceWidgetsWithDemoData();
+    } catch (e) {
+      return performanceWidgets;
+    }
+  }, []);
 
   // Combine all widgets available for the 'overview' tab instance
   const allOverviewTabWidgets = React.useMemo(() => [
-      ...statCardWidgets, ...overviewChartWidgets, ...businessWidgets, ...websiteWidgets,
-      ...marketingWidgets, ...productWidgets, ...customerWidgets, ...analyticsWidgets,
-      ...performanceWidgets, ...forecastWidgets
-  ], [statCardWidgets, overviewChartWidgets]); // Dependencies include memoized widgets
+      ...statCardWidgets, ...overviewChartWidgets,
+      ...businessWidgetsWithDemoData, ...websiteWidgetsWithDemoData,
+      ...marketingWidgetsWithDemoData, ...productWidgetsWithDemoData,
+      ...customerWidgetsWithDemoData, ...analyticsWidgetsWithDemoData,
+      ...performanceWidgetsWithDemoData, ...forecastWidgetsWithDemoData
+  ], [statCardWidgets, overviewChartWidgets,
+      businessWidgetsWithDemoData, websiteWidgetsWithDemoData,
+      marketingWidgetsWithDemoData, productWidgetsWithDemoData,
+      customerWidgetsWithDemoData, analyticsWidgetsWithDemoData,
+      performanceWidgetsWithDemoData, forecastWidgetsWithDemoData]); // Dependencies include memoized widgets
 
   // Map instance IDs to their full available widget lists
   const availableWidgetsMap: Record<string, WidgetDefinition[]> = React.useMemo(() => ({
     header: statCardWidgets,
     overview: allOverviewTabWidgets,
-    business: businessWidgets,
-    website: websiteWidgets,
-    marketing: marketingWidgets,
-    products: productWidgets,
-    customers: customerWidgets,
-    analytics: analyticsWidgets,
-    performance: performanceWidgets,
-    forecast: forecastWidgets,
-  }), [statCardWidgets, allOverviewTabWidgets]); // Dependency
+    business: businessWidgetsWithDemoData,
+    website: websiteWidgetsWithDemoData,
+    marketing: marketingWidgetsWithDemoData,
+    products: productWidgetsWithDemoData,
+    customers: customerWidgetsWithDemoData,
+    analytics: analyticsWidgetsWithDemoData,
+    performance: performanceWidgetsWithDemoData,
+    forecast: forecastWidgetsWithDemoData,
+  }), [statCardWidgets, allOverviewTabWidgets,
+       businessWidgetsWithDemoData, websiteWidgetsWithDemoData,
+       marketingWidgetsWithDemoData, productWidgetsWithDemoData,
+       customerWidgetsWithDemoData, analyticsWidgetsWithDemoData,
+       performanceWidgetsWithDemoData, forecastWidgetsWithDemoData]); // Updated dependencies
 
   // --- Layout State ---
   const [headerLayoutState, setHeaderLayoutState] = useState<LayoutSection[]>(() => [
     { id: "header-stats", title: "Pinned", widgets: statCardWidgets.map(w => w.id) }
   ]);
-  const [tabLayoutStates, setTabLayoutStates] = useState<Record<string, LayoutSection[]>>({
-    overview: defaultOverviewLayout,
-    business: defaultBusinessLayout,
-    website: defaultWebsiteLayout,
-    marketing: defaultMarketingLayout,
-    products: defaultProductLayout,
-    customers: defaultCustomerLayout,
-    analytics: defaultAnalyticsLayout,
-    performance: defaultPerformanceLayout,
-    forecast: defaultForecastLayout,
+  const [tabLayoutStates, setTabLayoutStates] = useState<Record<string, LayoutSection[]>>(() => {
+    // Create a function to generate default layout sections with widget IDs from demo data
+    const createLayoutWithDemoWidgets = (
+      defaultLayout: LayoutSection[],
+      demoWidgets: WidgetDefinition[]
+    ): LayoutSection[] => {
+      // If there are no demo widgets, return the default layout
+      if (!demoWidgets || demoWidgets.length === 0) {
+        return defaultLayout;
+      }
+      
+      // Create a map of widget IDs from demo widgets
+      const demoWidgetIds = demoWidgets.map(w => w.id);
+      
+      // Return a new layout with the same sections but with widget IDs from demo widgets
+      return defaultLayout.map(section => ({
+        ...section,
+        widgets: section.widgets.filter(id => demoWidgetIds.includes(id))
+      }));
+    };
+    
+    return {
+      overview: defaultOverviewLayout,
+      business: createLayoutWithDemoWidgets(defaultBusinessLayout, businessWidgetsWithDemoData),
+      website: createLayoutWithDemoWidgets(defaultWebsiteLayout, websiteWidgetsWithDemoData),
+      marketing: createLayoutWithDemoWidgets(defaultMarketingLayout, marketingWidgetsWithDemoData),
+      products: createLayoutWithDemoWidgets(defaultProductLayout, productWidgetsWithDemoData),
+      customers: createLayoutWithDemoWidgets(defaultCustomerLayout, customerWidgetsWithDemoData),
+      analytics: createLayoutWithDemoWidgets(defaultAnalyticsLayout, analyticsWidgetsWithDemoData),
+      performance: createLayoutWithDemoWidgets(defaultPerformanceLayout, performanceWidgetsWithDemoData),
+      forecast: createLayoutWithDemoWidgets(defaultForecastLayout, forecastWidgetsWithDemoData),
+    };
   });
 
   // --- Sidebar State ---

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { WidgetWrapper } from "./widget-components"
+import { WidgetDefinition } from "@/components/dashboard/customizable-layout"
 import {
   SalesFunnelDataPoint,
   CohortAnalysisDataPoint,
@@ -356,14 +357,18 @@ const ABTestingWidget: React.FC<ABTestingWidgetProps> = ({ data = [] }) => {
   );
 };
 
-// Define the analytics widgets with default empty data
-export const analyticsWidgets = [
+// Define the analytics widgets with optional data parameters
+export const createAnalyticsWidgets = (
+  salesFunnelData?: SalesFunnelDataPoint[],
+  cohortAnalysisData?: CohortAnalysisDataPoint[],
+  abTestingData?: ABTestingResult[]
+): WidgetDefinition[] => [
   {
     id: "sales-funnel",
     name: "Sales Funnel",
     description: "Conversion funnel from visit to purchase",
     category: "Analytics",
-    component: <SalesFunnelWidget data={[]} />,
+    component: <SalesFunnelWidget data={salesFunnelData || []} />,
     defaultSize: "medium" as WidgetSize
   },
   {
@@ -371,7 +376,7 @@ export const analyticsWidgets = [
     name: "Cohort Analysis",
     description: "Customer retention by cohort",
     category: "Analytics",
-    component: <CohortAnalysisWidget data={[]} />,
+    component: <CohortAnalysisWidget data={cohortAnalysisData || []} />,
     defaultSize: "full" as WidgetSize
   },
   {
@@ -379,10 +384,13 @@ export const analyticsWidgets = [
     name: "A/B Testing Results",
     description: "Results from recent A/B tests",
     category: "Analytics",
-    component: <ABTestingWidget data={[]} />,
+    component: <ABTestingWidget data={abTestingData || []} />,
     defaultSize: "medium" as WidgetSize
   }
 ];
+
+// Export default analytics widgets for backward compatibility
+export const analyticsWidgets = createAnalyticsWidgets();
 
 // Now that analyticsWidgets is defined, we can create the getRelatedWidgets function
 const getRelatedWidgets = (widgetId: string) => {

@@ -445,14 +445,19 @@ const getRelatedWidgets = (widgetId: string) => {
   return otherWidgets.slice(0, 2); // Return up to 2 related widgets
 };
 
-// Define website widgets
-export const websiteWidgets: WidgetDefinition[] = [
+// Create website widgets with data
+export const createWebsiteWidgets = (
+  pagePerformanceData: SitePerformanceMetric[] = [],
+  topPagesData: TopPage[] = [],
+  userBehaviorData: UserBehaviorMetric[] = [],
+  deviceBreakdownData: DeviceBreakdown[] = []
+): WidgetDefinition[] => [
   {
     id: "page-performance",
     name: "Page Performance",
     description: "Performance metrics for top pages",
     category: "Website",
-    component: <PagePerformanceWidget data={[]} />,
+    component: <PagePerformanceWidget data={pagePerformanceData} />,
     defaultSize: "large"
   },
   {
@@ -460,7 +465,7 @@ export const websiteWidgets: WidgetDefinition[] = [
     name: "Top Pages",
     description: "Most visited pages on your website",
     category: "Website",
-    component: <TopPagesWidget data={[]} />,
+    component: <TopPagesWidget data={topPagesData} />,
     defaultSize: "medium"
   },
   {
@@ -468,7 +473,7 @@ export const websiteWidgets: WidgetDefinition[] = [
     name: "User Behavior",
     description: "User behavior metrics",
     category: "Website",
-    component: <UserBehaviorWidget data={[]} />,
+    component: <UserBehaviorWidget data={userBehaviorData} />,
     defaultSize: "medium"
   },
   {
@@ -476,10 +481,13 @@ export const websiteWidgets: WidgetDefinition[] = [
     name: "Device Breakdown",
     description: "Traffic by device type",
     category: "Website",
-    component: <DeviceBreakdownWidget data={[]} />,
+    component: <DeviceBreakdownWidget data={deviceBreakdownData} />,
     defaultSize: "small"
   }
 ];
+
+// Define website widgets with empty data for backward compatibility
+export const websiteWidgets = createWebsiteWidgets();
 
 // Define default layout for website widgets
 export const defaultWebsiteLayout: LayoutSection[] = [

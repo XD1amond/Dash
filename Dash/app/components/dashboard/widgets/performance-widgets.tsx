@@ -319,14 +319,18 @@ const ProductPerformanceWidget: React.FC<ProductPerformanceWidgetProps> = ({ dat
 // Define the widget size type
 type WidgetSize = "small" | "medium" | "large" | "full";
 
-// Define performance widgets
-export const performanceWidgets: WidgetDefinition[] = [
+// Create performance widgets with data
+export const createPerformanceWidgets = (
+  performanceOverviewData: PerformanceOverviewItem[] = [],
+  marketingRoiData: MarketingRoiItem[] = [],
+  productPerformanceData: ProductPerformanceItem[] = []
+): WidgetDefinition[] => [
   {
     id: "performance-overview",
     name: "Performance Overview",
     description: "Key performance metrics",
     category: "Performance",
-    component: <PerformanceOverviewWidget data={[]} />,
+    component: <PerformanceOverviewWidget data={performanceOverviewData} />,
     defaultSize: "large" as WidgetSize
   },
   {
@@ -334,7 +338,7 @@ export const performanceWidgets: WidgetDefinition[] = [
     name: "Marketing ROI",
     description: "Return on investment by channel",
     category: "Performance",
-    component: <MarketingRoiWidget data={[]} />,
+    component: <MarketingRoiWidget data={marketingRoiData} />,
     defaultSize: "medium" as WidgetSize
   },
   {
@@ -342,10 +346,13 @@ export const performanceWidgets: WidgetDefinition[] = [
     name: "Product Performance",
     description: "Performance metrics by product category",
     category: "Performance",
-    component: <ProductPerformanceWidget data={[]} />,
+    component: <ProductPerformanceWidget data={productPerformanceData} />,
     defaultSize: "medium" as WidgetSize
   }
 ];
+
+// Define performance widgets with empty data for backward compatibility
+export const performanceWidgets = createPerformanceWidgets();
 
 // Get related widgets for a given widget
 const getRelatedWidgets = (widgetId: string) => {

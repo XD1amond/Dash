@@ -338,14 +338,18 @@ const getRelatedWidgets = (widgetId: string) => {
   return otherWidgets.slice(0, 2); // Return up to 2 related widgets
 };
 
-// Define marketing widgets
-export const marketingWidgets: WidgetDefinition[] = [
+// Create marketing widgets with data
+export const createMarketingWidgets = (
+  campaignPerformanceData: CampaignPerformance[] = [],
+  socialMediaPerformanceData: SocialMediaPerformance[] = [],
+  emailMetricsData: EmailMetrics[] = []
+): WidgetDefinition[] => [
   {
     id: "campaign-performance",
     name: "Campaign Performance",
     description: "Performance metrics for marketing campaigns",
     category: "Marketing",
-    component: <CampaignPerformanceWidget data={[]} />,
+    component: <CampaignPerformanceWidget data={campaignPerformanceData} />,
     defaultSize: "large"
   },
   {
@@ -353,7 +357,7 @@ export const marketingWidgets: WidgetDefinition[] = [
     name: "Social Media Performance",
     description: "Performance metrics for social media channels",
     category: "Marketing",
-    component: <SocialMediaPerformanceWidget data={[]} />,
+    component: <SocialMediaPerformanceWidget data={socialMediaPerformanceData} />,
     defaultSize: "medium"
   },
   {
@@ -361,10 +365,13 @@ export const marketingWidgets: WidgetDefinition[] = [
     name: "Email Campaign Metrics",
     description: "Performance metrics for email campaigns",
     category: "Marketing",
-    component: <EmailMetricsWidget data={[]} />,
+    component: <EmailMetricsWidget data={emailMetricsData} />,
     defaultSize: "medium"
   }
 ];
+
+// Define marketing widgets with empty data for backward compatibility
+export const marketingWidgets = createMarketingWidgets();
 
 // Define default layout for marketing widgets
 export const defaultMarketingLayout: LayoutSection[] = [

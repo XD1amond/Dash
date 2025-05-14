@@ -401,14 +401,24 @@ const CustomerLifetimeValueWidget: React.FC<CustomerLifetimeValueProps> = ({ dat
 
 // No need for the useBusinessData hook anymore as we're fetching data directly in each component
 
-// Define business widgets
-export const businessWidgets: WidgetDefinition[] = [
+// Define business widgets with optional data parameters
+export const createBusinessWidgets = (
+  revenueGrowthData?: { growthPercentage: string, comparisonPeriod: string },
+  revenueByChannelData?: RevenueByChannelItem[],
+  customerAcquisitionData?: { cac: string, change: string, period: string },
+  customerLifetimeValueData?: CustomerLifetimeValueItem[]
+): WidgetDefinition[] => [
   {
     id: "revenue-growth",
     name: "Revenue Growth",
     description: "Year-over-year revenue growth",
     category: "Business",
-    component: <RevenueGrowthWidget />,
+    component: revenueGrowthData
+      ? <RevenueGrowthWidget
+          growthPercentage={revenueGrowthData.growthPercentage}
+          comparisonPeriod={revenueGrowthData.comparisonPeriod}
+        />
+      : <RevenueGrowthWidget />,
     defaultSize: "medium"
   },
   {
@@ -416,7 +426,7 @@ export const businessWidgets: WidgetDefinition[] = [
     name: "Revenue by Channel",
     description: "Revenue breakdown by sales channel",
     category: "Business",
-    component: <RevenueByChannelWidget data={[]} />,
+    component: <RevenueByChannelWidget data={revenueByChannelData || []} />,
     defaultSize: "medium"
   },
   {
@@ -424,7 +434,13 @@ export const businessWidgets: WidgetDefinition[] = [
     name: "Customer Acquisition",
     description: "Cost of customer acquisition",
     category: "Business",
-    component: <CustomerAcquisitionWidget />,
+    component: customerAcquisitionData
+      ? <CustomerAcquisitionWidget
+          cac={customerAcquisitionData.cac}
+          change={customerAcquisitionData.change}
+          period={customerAcquisitionData.period}
+        />
+      : <CustomerAcquisitionWidget />,
     defaultSize: "medium"
   },
   {
@@ -432,10 +448,13 @@ export const businessWidgets: WidgetDefinition[] = [
     name: "Customer Lifetime Value",
     description: "Average customer lifetime value",
     category: "Business",
-    component: <CustomerLifetimeValueWidget data={[]} />,
+    component: <CustomerLifetimeValueWidget data={customerLifetimeValueData || []} />,
     defaultSize: "medium"
   }
 ];
+
+// Export default business widgets for backward compatibility
+export const businessWidgets = createBusinessWidgets();
 
 // Define default layout for business widgets
 export const defaultBusinessLayout: LayoutSection[] = [

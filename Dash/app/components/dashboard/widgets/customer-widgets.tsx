@@ -322,14 +322,23 @@ const CustomerFeedbackWidget: React.FC<CustomerFeedbackProps> = ({ data = [] }) 
   );
 };
 
-// Define customer insights widgets
-export const customerWidgets: WidgetDefinition[] = [
+// Define customer insights widgets with optional data parameters
+export const createCustomerWidgets = (
+  customerSegmentationData?: CustomerSegmentItem[],
+  customerSatisfactionData?: {
+    rating: string;
+    reviewCount: string;
+    change: string;
+    period: string;
+  },
+  customerFeedbackData?: CustomerFeedbackItem[]
+): WidgetDefinition[] => [
   {
     id: "customer-segments",
     name: "Customer Segments",
     description: "Distribution of customers by segment",
     category: "Customers",
-    component: <CustomerSegmentsWidget />,
+    component: <CustomerSegmentsWidget data={customerSegmentationData || []} />,
     defaultSize: "medium"
   },
   {
@@ -337,7 +346,14 @@ export const customerWidgets: WidgetDefinition[] = [
     name: "Customer Satisfaction",
     description: "Customer satisfaction metrics",
     category: "Customers",
-    component: <CustomerSatisfactionWidget />,
+    component: customerSatisfactionData ?
+      <CustomerSatisfactionWidget
+        rating={customerSatisfactionData.rating}
+        reviewCount={customerSatisfactionData.reviewCount}
+        change={customerSatisfactionData.change}
+        period={customerSatisfactionData.period}
+      /> :
+      <CustomerSatisfactionWidget />,
     defaultSize: "small"
   },
   {
@@ -345,10 +361,13 @@ export const customerWidgets: WidgetDefinition[] = [
     name: "Customer Feedback",
     description: "Feedback by category",
     category: "Customers",
-    component: <CustomerFeedbackWidget />,
+    component: <CustomerFeedbackWidget data={customerFeedbackData || []} />,
     defaultSize: "large"
   }
 ];
+
+// Export default customer widgets for backward compatibility
+export const customerWidgets = createCustomerWidgets();
 
 // Now that customerWidgets is defined, we can create the getRelatedWidgets function
 getRelatedWidgets = (widgetId: string) => {

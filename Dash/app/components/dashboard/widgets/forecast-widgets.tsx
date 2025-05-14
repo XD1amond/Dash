@@ -435,14 +435,32 @@ const TrendPredictionWidget: React.FC<TrendPredictionProps> = ({
   );
 };
 
-// Define forecast widgets
-export const forecastWidgets: WidgetDefinition[] = [
+// Define forecast widgets with optional data parameters
+export const createForecastWidgets = (
+  salesForecastData?: SalesForecastItem[],
+  inventoryForecastData?: InventoryForecastItem[],
+  trendPredictionData?: TrendPredictionItem[],
+  currentMonth?: string,
+  currentRevenue?: string,
+  projectedGrowth?: string,
+  stockSummary?: {
+    lowStock: number;
+    reorderSoon: number;
+    adequateStock: number;
+    overstocked: number;
+  }
+): WidgetDefinition[] => [
   {
     id: "revenue-forecast",
     name: "Revenue Forecast",
     description: "Projected revenue for the next 6 months",
     category: "Forecast",
-    component: <RevenueForecastWidget />,
+    component: <RevenueForecastWidget
+      data={salesForecastData || []}
+      currentMonth={currentMonth}
+      currentRevenue={currentRevenue}
+      projectedGrowth={projectedGrowth}
+    />,
     defaultSize: "large"
   },
   {
@@ -450,7 +468,10 @@ export const forecastWidgets: WidgetDefinition[] = [
     name: "Inventory Forecast",
     description: "Projected inventory needs",
     category: "Forecast",
-    component: <InventoryForecastWidget />,
+    component: <InventoryForecastWidget
+      data={inventoryForecastData || []}
+      stockSummary={stockSummary}
+    />,
     defaultSize: "medium"
   },
   {
@@ -458,10 +479,13 @@ export const forecastWidgets: WidgetDefinition[] = [
     name: "Trend Prediction",
     description: "Predicted upcoming trends",
     category: "Forecast",
-    component: <TrendPredictionWidget />,
+    component: <TrendPredictionWidget data={trendPredictionData || []} />,
     defaultSize: "medium"
   }
 ];
+
+// Export default forecast widgets for backward compatibility
+export const forecastWidgets = createForecastWidgets();
 
 // Define default layout for forecast widgets
 export const defaultForecastLayout: LayoutSection[] = [
